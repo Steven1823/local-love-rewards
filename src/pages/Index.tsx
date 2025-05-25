@@ -38,10 +38,10 @@ const Index = () => {
           <div className="mx-auto max-w-4xl text-center">
             <div className="mb-8 animate-fade-in">
               <Badge variant="outline" className="border-black text-black mb-4 animate-bounce">
-                Free Forever • No Setup Fees
+                100% Free • No Hidden Costs
               </Badge>
               <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl mb-6 animate-scale-in">
-                Local Love
+                Tunza
                 <span className="block text-gray-600 mt-2">Rewards</span>
               </h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{animationDelay: '0.3s'}}>
@@ -199,7 +199,7 @@ const Index = () => {
                 <Star className="mx-auto h-16 w-16 text-black mb-4 animate-pulse" />
                 <h3 className="text-2xl font-bold mb-4">Ready to Start?</h3>
                 <p className="text-gray-600 mb-6">
-                  Join hundreds of local businesses already using Local Love Rewards to build customer loyalty.
+                  Join hundreds of local businesses already using Tunza Rewards to build customer loyalty.
                 </p>
                 <Button 
                   onClick={() => setActiveView('business')}
@@ -216,7 +216,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-black text-white py-8">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-xl font-bold mb-2">Local Love Rewards</h3>
+          <h3 className="text-xl font-bold mb-2">Tunza Rewards</h3>
           <p className="text-gray-400">Building stronger communities, one loyal customer at a time.</p>
         </div>
       </footer>
