@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ArrowLeft, Users, TrendingUp, DollarSign, Star, Phone, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 
 interface BusinessDashboardProps {
+  businessPhone?: string | null;
   onBack: () => void;
 }
 
-const BusinessDashboard = ({ onBack }: BusinessDashboardProps) => {
+const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) => {
   const [searchPhone, setSearchPhone] = useState('');
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);

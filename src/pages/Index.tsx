@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BusinessDashboard from "@/components/BusinessDashboard";
 import CustomerLookup from "@/components/CustomerLookup";
 import BusinessOwnerSetup from "@/components/BusinessOwnerSetup";
+import ChurchFeatures from "@/components/ChurchFeatures";
 import confetti from 'canvas-confetti';
 
 const Index = () => {
@@ -61,6 +62,7 @@ const Index = () => {
   if (currentView === 'customer-lookup') {
     return (
       <CustomerLookup
+        phoneNumber=""
         onBack={() => setCurrentView('landing')}
       />
     );
@@ -248,6 +250,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Church Features Section */}
+      <ChurchFeatures />
 
       {/* How It Works Section */}
       <section id="how-it-works" className="relative z-10 px-6 py-24">

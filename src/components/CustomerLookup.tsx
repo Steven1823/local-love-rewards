@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ArrowLeft, Gift, Star, Phone, Calendar, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,11 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 
 interface CustomerLookupProps {
-  phoneNumber: string;
+  phoneNumber?: string;
   onBack: () => void;
 }
 
-const CustomerLookup = ({ phoneNumber, onBack }: CustomerLookupProps) => {
+const CustomerLookup = ({ phoneNumber = "", onBack }: CustomerLookupProps) => {
   const [searchPhone, setSearchPhone] = useState(phoneNumber);
   const [customerData, setCustomerData] = useState<any>(null);
 
