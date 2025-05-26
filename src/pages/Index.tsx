@@ -1,444 +1,463 @@
-
-import { useState } from "react";
-import { Phone, Store, Gift, Users, TrendingUp, Star, MessageCircle, Mail, Figma, Sparkles, Zap, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, Gift, Smartphone, TrendingUp, Star, Heart, Users, Zap, Sparkles, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import BusinessDashboard from "@/components/BusinessDashboard";
 import CustomerLookup from "@/components/CustomerLookup";
 import BusinessOwnerSetup from "@/components/BusinessOwnerSetup";
-import { useToast } from "@/hooks/use-toast";
+import confetti from 'canvas-confetti';
 
 const Index = () => {
-  const [activeView, setActiveView] = useState<'landing' | 'business' | 'customer' | 'setup'>('landing');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [businessOwnerPhone, setBusinessOwnerPhone] = useState('');
-  const { toast } = useToast();
+  const [currentView, setCurrentView] = useState<'landing' | 'business-setup' | 'business-dashboard' | 'customer-lookup'>('landing');
+  const [businessPhone, setBusinessPhone] = useState<string | null>(null);
 
-  const handleCustomerLookup = (phone: string) => {
-    setPhoneNumber(phone);
-    setActiveView('customer');
+  useEffect(() => {
+    document.title = "Tunza Rewards - Simple Loyalty Platform";
+  }, []);
+
+  const handleBusinessSetupComplete = (phone: string) => {
+    setBusinessPhone(phone);
+    setCurrentView('business-dashboard');
   };
 
-  const handleBusinessSetup = () => {
-    setActiveView('setup');
-  };
-
-  const handleWhatsAppContact = () => {
-    const targetNumber = businessOwnerPhone || '1234567890';
-    const message = encodeURIComponent("Hi! I'm interested in Tunza Rewards for my business. Can you help me get started?");
-    window.open(`https://wa.me/${targetNumber}?text=${message}`, '_blank');
-  };
-
-  const handleSMSContact = () => {
-    const targetNumber = businessOwnerPhone || '1234567890';
-    const message = encodeURIComponent("Hi! I'm interested in Tunza Rewards for my business.");
-    window.open(`sms:${targetNumber}?body=${message}`, '_blank');
-  };
-
-  const handleEmailSubscribe = () => {
-    if (!email) {
-      toast({
-        title: "Please enter your email",
-        description: "We need your email address to send you updates.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    toast({
-      title: "🎉 Welcome to the Future!",
-      description: "You're now part of the Tunza revolution!",
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
     });
-    setEmail('');
-    
-    // Wow moment - confetti effect
-    createConfettiEffect();
   };
 
-  const createConfettiEffect = () => {
-    // Create multiple colored particles
-    for (let i = 0; i < 50; i++) {
-      const confetti = document.createElement('div');
-      confetti.className = 'fixed pointer-events-none z-50';
-      confetti.style.left = Math.random() * 100 + 'vw';
-      confetti.style.top = '-10px';
-      confetti.style.width = '10px';
-      confetti.style.height = '10px';
-      confetti.style.backgroundColor = ['#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#10b981'][Math.floor(Math.random() * 5)];
-      confetti.style.animation = `confetti-fall ${2 + Math.random() * 3}s linear forwards`;
-      
-      document.body.appendChild(confetti);
-      
+  const triggerWowMoment = () => {
+    triggerConfetti();
+    // Add a subtle animation to the clicked element
+    const element = document.activeElement;
+    if (element) {
+      element.classList.add('animate-bounce-gentle');
       setTimeout(() => {
-        confetti.remove();
-      }, 5000);
+        element.classList.remove('animate-bounce-gentle');
+      }, 2000);
     }
   };
 
-  if (activeView === 'business') {
-    return <BusinessDashboard onBack={() => setActiveView('landing')} />;
+  if (currentView === 'business-setup') {
+    return (
+      <BusinessOwnerSetup
+        onBack={() => setCurrentView('landing')}
+        onComplete={handleBusinessSetupComplete}
+      />
+    );
   }
 
-  if (activeView === 'customer') {
-    return <CustomerLookup phoneNumber={phoneNumber} onBack={() => setActiveView('landing')} />;
+  if (currentView === 'business-dashboard') {
+    return (
+      <BusinessDashboard
+        businessPhone={businessPhone}
+        onBack={() => setCurrentView('landing')}
+      />
+    );
   }
 
-  if (activeView === 'setup') {
-    return <BusinessOwnerSetup onBack={() => setActiveView('landing')} onComplete={(phone) => {
-      setBusinessOwnerPhone(phone);
-      setActiveView('business');
-    }} />;
+  if (currentView === 'customer-lookup') {
+    return (
+      <CustomerLookup
+        onBack={() => setCurrentView('landing')}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white overflow-x-hidden relative">
-      {/* Enhanced Animated Background Elements with Glow Effects */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 w-96 h-96 bg-purple-500 rounded-full opacity-30 blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-32 w-96 h-96 bg-blue-500 rounded-full opacity-30 blur-3xl animate-pulse"></div>
-        <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-pink-500 rounded-full opacity-20 blur-2xl animate-float"></div>
-        <div className="absolute top-2/3 right-1/4 w-48 h-48 bg-cyan-400 rounded-full opacity-15 blur-xl animate-bounce-gentle"></div>
-        
-        {/* Floating Sparkles */}
-        <div className="absolute top-20 left-20 animate-float">
-          <Sparkles className="h-6 w-6 text-yellow-400 opacity-70" />
-        </div>
-        <div className="absolute top-40 right-40 animate-bounce-gentle">
-          <Zap className="h-8 w-8 text-purple-400 opacity-60" />
-        </div>
-        <div className="absolute bottom-32 left-32 animate-pulse-subtle">
-          <Heart className="h-5 w-5 text-pink-400 opacity-80" />
+        <div className="absolute -inset-10 opacity-50">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
+          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-float" style={{animationDelay: '2s'}}></div>
+          <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-float" style={{animationDelay: '4s'}}></div>
         </div>
       </div>
 
-      {/* Hero Section with Enhanced Animations */}
-      <div className="relative px-4 py-16 lg:py-24">
-        <div className="mx-auto max-w-6xl text-center">
-          <div className="mb-8">
-            <Badge variant="outline" className="border-purple-400 text-purple-300 mb-6 px-6 py-3 text-sm font-medium bg-black/30 backdrop-blur-sm animate-glow hover:scale-110 transition-all duration-300">
-              🚀 100% Free For Now • No Hidden Costs • Revolutionary
-            </Badge>
-            <h1 className="text-4xl sm:text-6xl lg:text-8xl font-bold tracking-tight mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-fade-in">
-              Tunza
-              <span className="block text-3xl sm:text-4xl lg:text-6xl mt-2 text-white/90 animate-slide-in-left">Rewards</span>
-            </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed animate-fade-in">
-              Turn every customer visit into lasting loyalty. Simple phone-based rewards that work for any business.
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute animate-float opacity-20"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 4}s`
+            }}
+          >
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+        ))}
+      </div>
+
+      {/* Navigation */}
+      <nav className="relative z-10 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center animate-glow">
+              <Heart className="h-6 w-6 text-white animate-pulse-subtle" />
+            </div>
+            <span className="text-2xl font-bold text-white">Tunza</span>
+          </div>
+          <div className="hidden md:flex space-x-8">
+            <a href="#features" className="text-white/80 hover:text-white transition-colors duration-200 hover:underline decoration-2 underline-offset-4">Features</a>
+            <a href="#how-it-works" className="text-white/80 hover:text-white transition-colors duration-200 hover:underline decoration-2 underline-offset-4">How It Works</a>
+            <a href="#testimonials" className="text-white/80 hover:text-white transition-colors duration-200 hover:underline decoration-2 underline-offset-4">Success Stories</a>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <div className="relative z-10 px-6 py-20 text-center">
+        <div className="max-w-4xl mx-auto">
+          <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm mb-8 animate-fade-in">
+            <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+            Free for now (not forever) • Works for any business or church
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
+            Turn Every Visit Into
+            <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent animate-shimmer bg-300% animate-pulse-subtle">
+              Lasting Loyalty
+            </span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-3xl mx-auto animate-fade-in">
+            Revolutionary phone-based rewards system for businesses, churches, and organizations. 
+            No apps to download, no complicated setups. Just phone numbers and instant rewards.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in">
+            <Button
+              onClick={() => {
+                setCurrentView('business-setup');
+                triggerWowMoment();
+              }}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-glow"
+            >
+              Start Free Setup
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button
+              onClick={() => {
+                setCurrentView('customer-lookup');
+                triggerWowMoment();
+              }}
+              variant="outline"
+              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-semibold rounded-xl transform hover:scale-105 transition-all duration-300"
+            >
+              Check My Rewards
+              <Gift className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="mt-12 text-white/60 animate-fade-in">
+            <div className="flex items-center justify-center space-x-6">
+              <div className="flex items-center">
+                <Star className="w-5 h-5 text-yellow-400 mr-1" />
+                <span>4.9/5 Rating</span>
+              </div>
+              <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+              <div className="flex items-center">
+                <Users className="w-5 h-5 text-green-400 mr-1" />
+                <span>10,000+ Happy Businesses</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-gentle">
+          <ChevronDown className="w-6 h-6 text-white/60" />
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <section id="features" className="relative z-10 px-6 py-24 bg-white/5 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 animate-fade-in">
+              Perfect for Every Organization
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto animate-fade-in">
+              From small businesses to large churches, our platform adapts to your unique needs
             </p>
           </div>
 
-          {/* Business Owner Phone Input with Glow Effect */}
-          <div className="mb-8 max-w-md mx-auto animate-scale-in">
-            <Label htmlFor="businessPhone" className="block text-sm font-medium mb-3 text-purple-300">Business Owner WhatsApp/SMS Number (Optional)</Label>
-            <div className="flex gap-2">
-              <Input
-                id="businessPhone"
-                placeholder="+1234567890"
-                value={businessOwnerPhone}
-                onChange={(e) => setBusinessOwnerPhone(e.target.value)}
-                className="bg-black/30 border-white/30 text-white placeholder:text-gray-400 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-300"
-              />
-              <Button
-                onClick={() => {
-                  if (businessOwnerPhone) {
-                    toast({
-                      title: "✨ Number saved! 🎉",
-                      description: "Contact buttons will now use your number.",
-                    });
-                    createConfettiEffect();
-                  }
-                }}
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/50"
-              >
-                Save
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-in-right">
-            <Button 
-              onClick={handleBusinessSetup}
-              size="lg" 
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-2xl shadow-purple-500/25 transform transition-all duration-300 hover:scale-110 hover:shadow-purple-500/50 relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-              <Store className="mr-2 h-5 w-5" />
-              I'm a Business Owner
-            </Button>
-            <Button 
-              onClick={() => setActiveView('customer')}
-              variant="outline" 
-              size="lg"
-              className="border-2 border-white/30 text-white bg-black/20 hover:bg-white/10 backdrop-blur-sm transform transition-all duration-300 hover:scale-110 hover:border-cyan-400 hover:text-cyan-300 hover:shadow-lg hover:shadow-cyan-400/25"
-            >
-              <Phone className="mr-2 h-5 w-5" />
-              I'm a Customer
-            </Button>
-          </div>
-
-          {/* Enhanced Features Grid with More Wow */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                icon: Phone,
+                icon: <Heart className="h-8 w-8" />,
+                title: "Churches & Ministries",
+                description: "Reward faithful attendance, volunteer work, and community involvement",
+                gradient: "from-purple-600 to-pink-600"
+              },
+              {
+                icon: <Users className="h-8 w-8" />,
+                title: "Local Businesses",
+                description: "Build customer loyalty with points for every purchase and visit",
+                gradient: "from-blue-600 to-cyan-600"
+              },
+              {
+                icon: <Smartphone className="h-8 w-8" />,
                 title: "Phone-Based Magic",
-                description: "No apps to download. Just enter your phone number and watch the magic happen instantly.",
-                gradient: "from-blue-600 to-cyan-600",
-                delay: "0ms"
+                description: "Works with any phone number - no apps or downloads required",
+                gradient: "from-green-600 to-teal-600"
               },
               {
-                icon: Gift,
-                title: "Automatic Rewards",
-                description: "Earn points with every visit. Redeem for discounts, free services, or special perks.",
-                gradient: "from-purple-600 to-pink-600",
-                delay: "200ms"
+                icon: <Gift className="h-8 w-8" />,
+                title: "Flexible Rewards",
+                description: "Customize rewards for your community's specific needs and values",
+                gradient: "from-orange-600 to-red-600"
               },
               {
-                icon: TrendingUp,
-                title: "Business Growth",
-                description: "Increase customer retention by 67% with our proven loyalty system.",
-                gradient: "from-green-600 to-teal-600",
-                delay: "400ms"
+                icon: <TrendingUp className="h-8 w-8" />,
+                title: "Growth Analytics",
+                description: "Track engagement and build stronger community connections",
+                gradient: "from-indigo-600 to-purple-600"
+              },
+              {
+                icon: <Zap className="h-8 w-8" />,
+                title: "Instant Setup",
+                description: "Get started in minutes with our simple setup process",
+                gradient: "from-yellow-600 to-orange-600"
               }
             ].map((feature, index) => (
               <Card 
-                key={index}
-                className="bg-black/30 border-white/30 backdrop-blur-sm hover:bg-black/40 transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-purple-500/30 group relative overflow-hidden animate-fade-in"
-                style={{ animationDelay: feature.delay }}
+                key={index} 
+                className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 animate-fade-in cursor-pointer"
+                onClick={triggerWowMoment}
+                style={{animationDelay: `${index * 0.1}s`}}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardHeader className="text-center pb-4 relative z-10">
-                  <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r ${feature.gradient} shadow-lg group-hover:scale-125 transition-transform duration-500 group-hover:rotate-12`}>
-                    <feature.icon className="h-8 w-8 text-white" />
+                <CardHeader className="text-center">
+                  <div className={`mx-auto w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center text-white mb-4 animate-glow`}>
+                    {feature.icon}
                   </div>
-                  <CardTitle className="text-xl text-white group-hover:text-purple-300 transition-colors duration-300">{feature.title}</CardTitle>
+                  <CardTitle className="text-white text-xl">{feature.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="relative z-10">
-                  <p className="text-gray-300 text-center leading-relaxed group-hover:text-gray-200 transition-colors duration-300">
-                    {feature.description}
-                  </p>
+                <CardContent>
+                  <p className="text-white/80 text-center">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Enhanced How It Works Section */}
-      <div className="py-16 bg-black/30 backdrop-blur-sm relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-pink-900/20"></div>
-        <div className="mx-auto max-w-6xl px-4 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent animate-fade-in">How The Magic Works</h2>
-            <p className="text-gray-300 text-lg lg:text-xl max-w-2xl mx-auto animate-fade-in">
-              Simple, effective loyalty in three magical steps
-            </p>
-          </div>
+      {/* How It Works Section */}
+      <section id="how-it-works" className="relative z-10 px-6 py-24">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-16 animate-fade-in">
+            Simple. Powerful. Universal.
+          </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {[
-              { step: "1", title: "Customer Visits", description: "Customer provides phone number at checkout", color: "from-blue-500 to-cyan-500", delay: "0ms" },
-              { step: "2", title: "Points Added", description: "Automatic points based on purchase amount", color: "from-purple-500 to-pink-500", delay: "300ms" },
-              { step: "3", title: "Rewards Earned", description: "Redeem points for discounts and free services", color: "from-green-500 to-teal-500", delay: "600ms" }
-            ].map((item, index) => (
-              <div key={index} className="text-center group animate-scale-in" style={{ animationDelay: item.delay }}>
-                <div className={`inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r ${item.color} text-white rounded-full text-3xl font-bold mb-6 shadow-2xl group-hover:scale-125 transition-all duration-500 group-hover:rotate-12 relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <span className="relative z-10">{item.step}</span>
+              {
+                step: "1",
+                title: "Quick Setup",
+                description: "Register your business or church in under 5 minutes. Set your reward structure and you're ready to go.",
+                icon: <Zap className="h-12 w-12" />
+              },
+              {
+                step: "2", 
+                title: "Members Join",
+                description: "People simply provide their phone number - no apps, no cards, no complications.",
+                icon: <Smartphone className="h-12 w-12" />
+              },
+              {
+                step: "3",
+                title: "Automatic Rewards",
+                description: "Points are earned automatically with each visit or action. Rewards unlock instantly when thresholds are met.",
+                icon: <Gift className="h-12 w-12" />
+              }
+            ].map((step, index) => (
+              <div 
+                key={index} 
+                className="animate-fade-in cursor-pointer transform hover:scale-105 transition-all duration-300"
+                onClick={triggerWowMoment}
+                style={{animationDelay: `${index * 0.2}s`}}
+              >
+                <div className="bg-gradient-to-r from-purple-600 to-pink-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold animate-glow">
+                  {step.step}
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-white group-hover:text-purple-300 transition-colors duration-300">{item.title}</h3>
-                <p className="text-gray-300 group-hover:text-gray-200 transition-colors duration-300 max-w-xs mx-auto">{item.description}</p>
+                <div className="text-white mb-4">
+                  {step.icon}
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">{step.title}</h3 >
+                <p className="text-white/80 text-lg max-w-sm mx-auto">{step.description}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Enhanced Contact & Newsletter Section */}
-      <div className="py-16 relative">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="animate-slide-in-left">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Join The Revolution</h2>
-              
-              {/* Newsletter Signup with Enhanced Effects */}
-              <Card className="mb-8 bg-black/30 border-white/30 backdrop-blur-sm hover:bg-black/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <CardHeader className="relative z-10">
-                  <CardTitle className="flex items-center text-white">
-                    <Mail className="mr-2 h-5 w-5 text-purple-400" />
-                    Get Exclusive Updates
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="relative z-10">
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Input
-                      type="email"
-                      placeholder="Enter your email for magic updates"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="flex-1 bg-black/30 border-white/30 text-white placeholder:text-gray-400 backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-300"
-                    />
-                    <Button 
-                      onClick={handleEmailSubscribe}
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-purple-500/50"
-                    >
-                      Join Revolution
-                    </Button>
+      {/* Testimonials Section */}
+      <section id="testimonials" className="relative z-10 px-6 py-24 bg-white/5 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16 animate-fade-in">
+            Loved by Communities Everywhere
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Pastor Michael Johnson",
+                role: "Grace Community Church",
+                content: "Our congregation engagement has increased by 40% since implementing Tunza. Members love earning points for attendance and volunteer work.",
+                avatar: "👨‍💼"
+              },
+              {
+                name: "Sarah Chen",
+                role: "Sunny's Hair Salon",
+                content: "Customer retention improved by 67% in just 3 months. The phone-based system is so simple that even my oldest clients love it.",
+                avatar: "👩‍💼"
+              },
+              {
+                name: "Rabbi David Goldman",
+                role: "Temple Beth Shalom",
+                content: "Tunza has transformed how we connect with our community. The simplicity is perfect for our diverse congregation.",
+                avatar: "👨‍🎓"
+              }
+            ].map((testimonial, index) => (
+              <Card 
+                key={index} 
+                className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 animate-fade-in cursor-pointer"
+                onClick={triggerWowMoment}
+                style={{animationDelay: `${index * 0.1}s`}}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-2xl mr-4">
+                      {testimonial.avatar}
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold">{testimonial.name}</h4>
+                      <p className="text-white/60 text-sm">{testimonial.role}</p>
+                    </div>
+                  </div>
+                  <p className="text-white/80 italic">"{testimonial.content}"</p>
+                  <div className="flex text-yellow-400 mt-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-current" />
+                    ))}
                   </div>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              {/* Enhanced Contact Options */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* WhatsApp Contact */}
-                <Card className="bg-black/30 border-white/30 backdrop-blur-sm hover:bg-green-500/20 hover:border-green-400/70 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-green-500/25 group">
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <MessageCircle className="mx-auto h-10 w-10 text-green-400 mb-3 group-hover:scale-125 transition-transform duration-300" />
-                      <h3 className="text-white font-bold mb-3">WhatsApp</h3>
-                      <Button 
-                        onClick={handleWhatsAppContact}
-                        size="sm"
-                        className="w-full bg-green-500 text-white hover:bg-green-600 border-0 shadow-lg hover:scale-105 transition-all duration-300"
-                      >
-                        Chat Now
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* SMS Contact */}
-                <Card className="bg-black/30 border-white/30 backdrop-blur-sm hover:bg-blue-500/20 hover:border-blue-400/70 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-blue-500/25 group">
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <Phone className="mx-auto h-10 w-10 text-blue-400 mb-3 group-hover:scale-125 transition-transform duration-300" />
-                      <h3 className="text-white font-bold mb-3">SMS</h3>
-                      <Button 
-                        onClick={handleSMSContact}
-                        size="sm"
-                        className="w-full bg-blue-500 text-white hover:bg-blue-600 border-0 shadow-lg hover:scale-105 transition-all duration-300"
-                      >
-                        Send SMS
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+      {/* Mobile App CTA Section */}
+      <section className="relative z-10 px-6 py-24">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-md rounded-3xl p-12 border border-white/20">
+            <Smartphone className="w-20 h-20 text-white mx-auto mb-8 animate-float" />
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 animate-fade-in">
+              Coming Soon to App Stores
+            </h2>
+            <p className="text-xl text-white/80 mb-8 animate-fade-in">
+              We're working on bringing Tunza to iOS and Android app stores. 
+              Join our waitlist to be the first to know when it's available!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                onClick={triggerWowMoment}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-glow"
+              >
+                Join App Store Waitlist
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             </div>
-
-            {/* Enhanced Benefits Section */}
-            <div className="animate-slide-in-right">
-              <div className="flex items-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-bold text-white">Perfect for Any Business</h2>
-                <Figma className="ml-4 h-8 w-8 text-purple-400 animate-pulse-subtle" />
+            <div className="mt-8 flex justify-center space-x-8 text-white/60">
+              <div className="flex items-center">
+                <span className="text-2xl mr-2">📱</span>
+                <span>iOS App Store</span>
               </div>
-              
-              <div className="space-y-6">
-                {[
-                  { title: "Salons & Spas", description: "Reward regular clients with service discounts and exclusive perks", icon: "💅", delay: "0ms" },
-                  { title: "Barbershops", description: "Build a loyal customer base with points for every cut and shave", icon: "✂️", delay: "200ms" },
-                  { title: "Local Eateries", description: "Encourage repeat visits with meal rewards and special offers", icon: "🍕", delay: "400ms" },
-                  { title: "Retail Stores", description: "Transform one-time shoppers into loyal brand advocates", icon: "🛍️", delay: "600ms" },
-                  { title: "Fitness Centers", description: "Motivate members with workout rewards and milestone bonuses", icon: "💪", delay: "800ms" }
-                ].map((business, index) => (
-                  <div 
-                    key={index}
-                    className="flex items-start space-x-4 p-4 rounded-xl bg-black/30 backdrop-blur-sm hover:bg-black/40 transition-all duration-300 hover:scale-105 group border border-white/20 hover:border-purple-400/50 animate-fade-in relative overflow-hidden"
-                    style={{ animationDelay: business.delay }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="text-2xl group-hover:scale-125 transition-transform duration-300 relative z-10">{business.icon}</div>
-                    <div className="relative z-10">
-                      <h3 className="font-semibold text-lg mb-2 text-white group-hover:text-purple-300 transition-colors duration-300">{business.title}</h3>
-                      <p className="text-gray-300 group-hover:text-gray-200 transition-colors duration-300">{business.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-10 bg-gradient-to-r from-purple-900/50 to-pink-900/50 p-8 rounded-2xl backdrop-blur-sm border border-white/30 hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/25 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-pink-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="text-center relative z-10">
-                  <Star className="mx-auto h-12 w-12 text-yellow-400 mb-4 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300" />
-                  <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-purple-300 transition-colors duration-300">Ready to Transform?</h3>
-                  <p className="text-gray-300 mb-6 max-w-md mx-auto group-hover:text-gray-200 transition-colors duration-300">
-                    Join thousands of businesses already using Tunza Rewards to build unbreakable customer loyalty.
-                  </p>
-                  <Button 
-                    onClick={handleBusinessSetup}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-2xl shadow-purple-500/25 hover:scale-105 transition-all duration-300 hover:shadow-purple-500/50 relative overflow-hidden group"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                    <span className="relative z-10">Start Your Revolution</span>
-                  </Button>
-                </div>
+              <div className="flex items-center">
+                <span className="text-2xl mr-2">🤖</span>
+                <span>Google Play Store</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Enhanced Footer */}
-      <footer className="bg-black/50 backdrop-blur-sm py-12 border-t border-white/30 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-pink-900/20"></div>
-        <div className="mx-auto max-w-6xl px-4 relative z-10">
-          <div className="text-center">
-            <h3 className="text-2xl lg:text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse-subtle">Tunza Rewards</h3>
-            <p className="text-gray-300 lg:text-lg max-w-xl mx-auto mb-8">
-              Building stronger communities, one loyal customer at a time. 🌟
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                onClick={handleWhatsAppContact}
-                variant="outline" 
-                size="sm"
-                className="border-white/30 text-white bg-black/30 hover:bg-green-500/20 hover:border-green-400 backdrop-blur-sm hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-green-400/25"
-              >
-                <MessageCircle className="mr-2 h-4 w-4" />
-                WhatsApp Support
-              </Button>
-              <Button 
-                onClick={handleSMSContact}
-                variant="outline" 
-                size="sm"
-                className="border-white/30 text-white bg-black/30 hover:bg-blue-500/20 hover:border-blue-400 backdrop-blur-sm hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/25"
-              >
-                <Phone className="mr-2 h-4 w-4" />
-                SMS Support
-              </Button>
-              <Button 
-                onClick={() => window.open('mailto:support@tunza.com', '_blank')}
-                variant="outline" 
-                size="sm"
-                className="border-white/30 text-white bg-black/30 hover:bg-purple-500/20 hover:border-purple-400 backdrop-blur-sm hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-purple-400/25"
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Email Us
-              </Button>
+      {/* Final CTA */}
+      <section className="relative z-10 px-6 py-24 text-center">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
+            Ready to Transform Your Community?
+          </h2>
+          <p className="text-xl text-white/80 mb-12 animate-fade-in">
+            Join thousands of businesses and churches already using Tunza to build stronger connections.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <Button
+              onClick={() => {
+                setCurrentView('business-setup');
+                triggerWowMoment();
+              }}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-12 py-6 text-xl font-bold rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-glow"
+            >
+              Start Free Today
+              <ArrowRight className="ml-3 h-6 w-6" />
+            </Button>
+            <Button
+              onClick={() => {
+                setCurrentView('customer-lookup');
+                triggerWowMoment();
+              }}
+              variant="outline"
+              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-12 py-6 text-xl font-bold rounded-2xl transform hover:scale-105 transition-all duration-300"
+            >
+              Check Rewards
+              <Gift className="ml-3 h-6 w-6" />
+            </Button>
+          </div>
+
+          <div className="mt-16 text-white/60">
+            <p className="text-lg">Free for now (not forever) • No credit card required • Setup in under 5 minutes</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 px-6 py-12 bg-black/20 backdrop-blur-sm border-t border-white/10">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="flex items-center justify-center space-x-2 mb-6">
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+              <Heart className="h-5 w-5 text-white" />
             </div>
+            <span className="text-xl font-bold text-white">Tunza</span>
+          </div>
+          <p className="text-white/60 mb-4">
+            Built with ❤️ using Lovable • Transforming communities one visit at a time
+          </p>
+          <div className="flex justify-center space-x-6 text-white/60">
+            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms</a>
+            <a href="#" className="hover:text-white transition-colors">Contact</a>
           </div>
         </div>
       </footer>
 
-      {/* Custom Styles for Confetti Animation */}
-      <style jsx>{`
-        @keyframes confetti-fall {
-          0% {
-            transform: translateY(-100vh) rotate(0deg);
-            opacity: 1;
+      <style>
+        {`
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
           }
-          100% {
-            transform: translateY(100vh) rotate(720deg);
-            opacity: 0;
-          }
-        }
-      `}</style>
+          .bg-300% { background-size: 300% 300%; }
+        `}
+      </style>
     </div>
   );
 };
