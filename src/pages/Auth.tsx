@@ -1,12 +1,16 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { auth } from "@/lib/firebase";
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  sendEmailVerification 
+} from "firebase/auth";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -23,12 +27,8 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        if (data.user) {
+        const { user } = await signInWithEmailAndPassword(auth, email, password);
+        if (user) {
           toast.success("Successfully signed in!");
           navigate("/dashboard");
         }
@@ -38,17 +38,9 @@ const Auth = () => {
           setLoading(false);
           return;
         }
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              email_from: 'Tunza <noreply@tunza.com>'
-            }
-          }
-        });
-        if (error) throw error;
-        if (data.user) {
+        const { user } = await createUserWithEmailAndPassword(auth, email, password);
+        if (user) {
+          await sendEmailVerification(user);
           toast.success("Account created successfully! Please check your email to verify your account.");
           navigate("/dashboard");
         }
