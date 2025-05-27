@@ -2,9 +2,11 @@
 import { Heart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navigation = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, signOut } = useAuth();
 
   return (
     <nav className="relative z-10 px-6 py-4">
@@ -22,14 +24,33 @@ const Navigation = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <Button
-            onClick={() => navigate("/auth")}
-            variant="outline"
-            className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
-          >
-            <User className="h-4 w-4 mr-2" />
-            Sign In
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <Button
+                onClick={() => navigate("/dashboard")}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              >
+                Dashboard
+              </Button>
+              <Button
+                onClick={signOut}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              >
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <Button
+              onClick={() => navigate("/auth")}
+              variant="outline"
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+            >
+              <User className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
     </nav>

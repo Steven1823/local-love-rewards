@@ -9,7 +9,173 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      businesses: {
+        Row: {
+          address: string | null
+          business_name: string
+          created_at: string
+          email: string | null
+          id: string
+          owner_name: string
+          phone_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          business_name: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          owner_name: string
+          phone_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          business_name?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          owner_name?: string
+          phone_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          last_visit: string | null
+          name: string
+          phone_number: string
+          points: number
+          total_spent: number
+          total_visits: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          last_visit?: string | null
+          name?: string
+          phone_number: string
+          points?: number
+          total_spent?: number
+          total_visits?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          last_visit?: string | null
+          name?: string
+          phone_number?: string
+          points?: number
+          total_spent?: number
+          total_visits?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          business_id: string
+          customer_id: string
+          id: string
+          message_content: string
+          message_type: string
+          sent_at: string
+        }
+        Insert: {
+          business_id: string
+          customer_id: string
+          id?: string
+          message_content: string
+          message_type: string
+          sent_at?: string
+        }
+        Update: {
+          business_id?: string
+          customer_id?: string
+          id?: string
+          message_content?: string
+          message_type?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visits: {
+        Row: {
+          amount: number
+          business_id: string
+          customer_id: string
+          id: string
+          points_earned: number
+          visit_date: string
+        }
+        Insert: {
+          amount: number
+          business_id: string
+          customer_id: string
+          id?: string
+          points_earned: number
+          visit_date?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          customer_id?: string
+          id?: string
+          points_earned?: number
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

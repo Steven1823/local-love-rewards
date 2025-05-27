@@ -30,7 +30,7 @@ const Auth = () => {
         if (error) throw error;
         if (data.user) {
           toast.success("Successfully signed in!");
-          navigate("/");
+          navigate("/dashboard");
         }
       } else {
         if (password !== confirmPassword) {
@@ -41,14 +41,20 @@ const Auth = () => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              email_from: 'Tunza <noreply@tunza.com>'
+            }
+          }
         });
         if (error) throw error;
         if (data.user) {
-          toast.success("Account created successfully!");
-          navigate("/");
+          toast.success("Account created successfully! Please check your email to verify your account.");
+          navigate("/dashboard");
         }
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
       toast.error(error.message || "An error occurred");
     } finally {
       setLoading(false);
@@ -70,12 +76,12 @@ const Auth = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <CardTitle className="text-2xl font-bold text-white">
-            {isLogin ? "Welcome Back" : "Create Account"}
+            {isLogin ? "Welcome Back" : "Join Tunza"}
           </CardTitle>
           <p className="text-white/80">
             {isLogin 
               ? "Sign in to your Tunza account" 
-              : "Join thousands of businesses using Tunza"
+              : "Create your account to get started"
             }
           </p>
         </CardHeader>

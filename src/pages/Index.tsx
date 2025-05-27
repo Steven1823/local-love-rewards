@@ -1,31 +1,23 @@
 
 import { useState, useEffect } from "react";
-import BusinessDashboard from "@/components/BusinessDashboard";
-import CustomerLookup from "@/components/CustomerLookup";
-import BusinessOwnerSetup from "@/components/BusinessOwnerSetup";
-import BusinessTypes from "@/components/BusinessTypes";
 import Navigation from "@/components/Navigation";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import Hero from "@/components/Hero";
 import FeatureSection from "@/components/FeatureSection";
+import BusinessTypes from "@/components/BusinessTypes";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import MobileAppSection from "@/components/MobileAppSection";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 import confetti from 'canvas-confetti';
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<'landing' | 'business-setup' | 'business-dashboard' | 'customer-lookup'>('landing');
-  const [businessPhone, setBusinessPhone] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title = "Tunza Rewards - Simple Loyalty Platform";
   }, []);
-
-  const handleBusinessSetupComplete = (phone: string) => {
-    setBusinessPhone(phone);
-    setCurrentView('business-dashboard');
-  };
 
   const triggerConfetti = () => {
     confetti({
@@ -46,60 +38,31 @@ const Index = () => {
     }
   };
 
-  if (currentView === 'business-setup') {
-    return (
-      <BusinessOwnerSetup
-        onBack={() => setCurrentView('landing')}
-        onComplete={handleBusinessSetupComplete}
-      />
-    );
-  }
+  const handleGetStarted = () => {
+    navigate("/auth");
+    triggerWowMoment();
+  };
 
-  if (currentView === 'business-dashboard') {
-    return (
-      <BusinessDashboard
-        businessPhone={businessPhone}
-        onBack={() => setCurrentView('landing')}
-      />
-    );
-  }
-
-  if (currentView === 'customer-lookup') {
-    return (
-      <CustomerLookup
-        phoneNumber=""
-        onBack={() => setCurrentView('landing')}
-      />
-    );
-  }
+  const handleCheckRewards = () => {
+    navigate("/auth");
+    triggerWowMoment();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
       <AnimatedBackground />
       <Navigation />
       <Hero 
-        onStartSetup={() => {
-          setCurrentView('business-setup');
-          triggerWowMoment();
-        }}
-        onCheckRewards={() => {
-          setCurrentView('customer-lookup');
-          triggerWowMoment();
-        }}
+        onStartSetup={handleGetStarted}
+        onCheckRewards={handleCheckRewards}
       />
       <FeatureSection onTriggerWowMoment={triggerWowMoment} />
       <BusinessTypes />
       <HowItWorksSection onTriggerWowMoment={triggerWowMoment} />
       <MobileAppSection onTriggerWowMoment={triggerWowMoment} />
       <FinalCTA 
-        onStartSetup={() => {
-          setCurrentView('business-setup');
-          triggerWowMoment();
-        }}
-        onCheckRewards={() => {
-          setCurrentView('customer-lookup');
-          triggerWowMoment();
-        }}
+        onStartSetup={handleGetStarted}
+        onCheckRewards={handleCheckRewards}
       />
       <Footer />
 
