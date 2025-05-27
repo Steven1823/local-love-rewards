@@ -1,6 +1,7 @@
 
 import { ArrowRight, Gift, Star, Users, Zap, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface HeroProps {
   onStartSetup: () => void;
@@ -8,6 +9,8 @@ interface HeroProps {
 }
 
 const Hero = ({ onStartSetup, onCheckRewards }: HeroProps) => {
+  const navigate = useNavigate();
+
   return (
     <>
       {/* Hero Section */}
@@ -15,7 +18,7 @@ const Hero = ({ onStartSetup, onCheckRewards }: HeroProps) => {
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm mb-8 animate-fade-in">
             <Zap className="w-4 h-4 mr-2 text-yellow-400" />
-            Free for now (not forever) • Works for any business or church
+            Free to start • Works for any business
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
@@ -26,16 +29,16 @@ const Hero = ({ onStartSetup, onCheckRewards }: HeroProps) => {
           </h1>
           
           <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-3xl mx-auto animate-fade-in">
-            Revolutionary phone-based rewards system for businesses, churches, and organizations. 
+            Revolutionary phone-based rewards system for businesses and organizations. 
             No apps to download, no complicated setups. Just phone numbers and instant rewards.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in">
             <Button
-              onClick={onStartSetup}
+              onClick={() => navigate("/auth")}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-glow"
             >
-              Start Free Setup
+              Get Started Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button
@@ -52,12 +55,12 @@ const Hero = ({ onStartSetup, onCheckRewards }: HeroProps) => {
             <div className="flex items-center justify-center space-x-6">
               <div className="flex items-center">
                 <Star className="w-5 h-5 text-yellow-400 mr-1" />
-                <span>4.9/5 Rating</span>
+                <span>Easy Setup</span>
               </div>
               <div className="w-1 h-1 bg-white/40 rounded-full"></div>
               <div className="flex items-center">
                 <Users className="w-5 h-5 text-green-400 mr-1" />
-                <span>10,000+ Happy Businesses</span>
+                <span>For All Businesses</span>
               </div>
             </div>
           </div>

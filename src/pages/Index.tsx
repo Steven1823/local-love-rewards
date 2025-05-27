@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import BusinessDashboard from "@/components/BusinessDashboard";
 import CustomerLookup from "@/components/CustomerLookup";
@@ -8,7 +9,6 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 import Hero from "@/components/Hero";
 import FeatureSection from "@/components/FeatureSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
 import MobileAppSection from "@/components/MobileAppSection";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
@@ -90,7 +90,6 @@ const Index = () => {
       <FeatureSection onTriggerWowMoment={triggerWowMoment} />
       <BusinessTypes />
       <HowItWorksSection onTriggerWowMoment={triggerWowMoment} />
-      <TestimonialsSection onTriggerWowMoment={triggerWowMoment} />
       <MobileAppSection onTriggerWowMoment={triggerWowMoment} />
       <FinalCTA 
         onStartSetup={() => {
