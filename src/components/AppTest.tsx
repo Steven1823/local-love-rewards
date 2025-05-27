@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, XCircle, TestTube } from "lucide-react";
+import confetti from 'canvas-confetti';
 
 const AppTest = () => {
   const [testResults, setTestResults] = useState<{[key: string]: boolean}>({});
