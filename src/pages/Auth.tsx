@@ -28,26 +28,21 @@ const Auth = () => {
     try {
       if (isLogin) {
         const { user } = await signInWithEmailAndPassword(auth, email, password);
-        if (user) {
-          toast.success("Successfully signed in!");
-          navigate("/dashboard");
-        }
+        toast.success("Successfully signed in!");
+        navigate("/dashboard");
       } else {
         if (password !== confirmPassword) {
           toast.error("Passwords don't match");
-          setLoading(false);
           return;
         }
         const { user } = await createUserWithEmailAndPassword(auth, email, password);
-        if (user) {
-          await sendEmailVerification(user);
-          toast.success("Account created successfully! Please check your email to verify your account.");
-          navigate("/dashboard");
-        }
+        await sendEmailVerification(user);
+        toast.success("Account created! Please check your email to verify your account.");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      toast.error(error.message || "An error occurred");
+      toast.error(error.message || "An error occurred during authentication");
     } finally {
       setLoading(false);
     }
