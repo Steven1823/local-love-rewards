@@ -2,7 +2,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.e8e05edace234bd0b7e714937a094cb3',
+  appId: 'app.lovable.tunza.rewards',
   appName: 'Tunza Rewards',
   webDir: 'dist',
   server: {
@@ -13,8 +13,17 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: '#1a1a2e',
-      showSpinner: false
+      showSpinner: false,
+      androidSplashResourceName: 'splash',
+      androidScaleType: 'CENTER_CROP'
+    },
+    StatusBar: {
+      style: 'LIGHT',
+      backgroundColor: '#1a1a2e'
     }
+  },
+  android: {
+    allowMixedContent: true
   }
 };
 

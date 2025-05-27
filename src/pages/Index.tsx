@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import BusinessDashboard from "@/components/BusinessDashboard";
 import CustomerLookup from "@/components/CustomerLookup";
 import BusinessOwnerSetup from "@/components/BusinessOwnerSetup";
-import ChurchFeatures from "@/components/ChurchFeatures";
+import BusinessTypes from "@/components/BusinessTypes";
 import Navigation from "@/components/Navigation";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import Hero from "@/components/Hero";
@@ -89,7 +88,7 @@ const Index = () => {
         }}
       />
       <FeatureSection onTriggerWowMoment={triggerWowMoment} />
-      <ChurchFeatures />
+      <BusinessTypes />
       <HowItWorksSection onTriggerWowMoment={triggerWowMoment} />
       <TestimonialsSection onTriggerWowMoment={triggerWowMoment} />
       <MobileAppSection onTriggerWowMoment={triggerWowMoment} />

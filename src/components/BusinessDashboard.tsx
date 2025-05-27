@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ArrowLeft, Users, TrendingUp, DollarSign, Star, Phone, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,26 +16,49 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
   const [searchPhone, setSearchPhone] = useState('');
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [customers, setCustomers] = useState<any[]>([]);
 
-  // Mock data - will be replaced with Supabase data
+  // Real stats that start at 0
   const stats = {
-    totalCustomers: 247,
-    monthlyVisits: 89,
-    averageSpend: 45.60,
-    rewardsClaimed: 23
+    totalCustomers: customers.length,
+    monthlyVisits: customers.reduce((sum, c) => sum + (c.visits || 0), 0),
+    averageSpend: customers.length > 0 ? customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) / customers.length : 0,
+    rewardsClaimed: customers.reduce((sum, c) => sum + (c.rewardsClaimed || 0), 0)
   };
-
-  const recentCustomers = [
-    { phone: "(555) 123-4567", name: "Sarah Johnson", visits: 12, points: 480, lastVisit: "2 days ago" },
-    { phone: "(555) 987-6543", name: "Mike Chen", visits: 8, points: 320, lastVisit: "1 week ago" },
-    { phone: "(555) 456-7890", name: "Emma Davis", visits: 15, points: 600, lastVisit: "Today" }
-  ];
 
   const handleAddVisit = () => {
     if (!searchPhone || !purchaseAmount) return;
     
-    // This will be replaced with Supabase integration
-    console.log('Adding visit:', { phone: searchPhone, amount: purchaseAmount });
+    const amount = parseFloat(purchaseAmount);
+    const points = Math.floor(amount); // 1 point per dollar spent
+    
+    // Find existing customer or create new one
+    const existingCustomerIndex = customers.findIndex(c => c.phone === searchPhone);
+    
+    if (existingCustomerIndex >= 0) {
+      // Update existing customer
+      const updatedCustomers = [...customers];
+      updatedCustomers[existingCustomerIndex] = {
+        ...updatedCustomers[existingCustomerIndex],
+        visits: (updatedCustomers[existingCustomerIndex].visits || 0) + 1,
+        points: (updatedCustomers[existingCustomerIndex].points || 0) + points,
+        totalSpent: (updatedCustomers[existingCustomerIndex].totalSpent || 0) + amount,
+        lastVisit: "Today"
+      };
+      setCustomers(updatedCustomers);
+    } else {
+      // Add new customer
+      const newCustomer = {
+        phone: searchPhone,
+        name: selectedCustomer?.name || "Customer",
+        visits: 1,
+        points: points,
+        totalSpent: amount,
+        lastVisit: "Today",
+        rewardsClaimed: 0
+      };
+      setCustomers([...customers, newCustomer]);
+    }
     
     // Reset form
     setSearchPhone('');
@@ -45,8 +69,7 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
   const handleSearchCustomer = () => {
     if (!searchPhone) return;
     
-    // Mock customer lookup - will be replaced with Supabase
-    const customer = recentCustomers.find(c => c.phone === searchPhone);
+    const customer = customers.find(c => c.phone === searchPhone);
     setSelectedCustomer(customer || { phone: searchPhone, name: "New Customer", visits: 0, points: 0 });
   };
 
@@ -84,24 +107,18 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalCustomers}</div>
-              <p className="text-xs text-green-600 flex items-center">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +12% from last month
-              </p>
+              <p className="text-xs text-gray-600">Active customers</p>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-lg transition-shadow duration-200 animate-fade-in" style={{animationDelay: '0.1s'}}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Visits</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Visits</CardTitle>
               <Star className="h-4 w-4 text-gray-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.monthlyVisits}</div>
-              <p className="text-xs text-green-600 flex items-center">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +8% from last month
-              </p>
+              <p className="text-xs text-gray-600">All time visits</p>
             </CardContent>
           </Card>
 
@@ -111,11 +128,8 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
               <DollarSign className="h-4 w-4 text-gray-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${stats.averageSpend}</div>
-              <p className="text-xs text-green-600 flex items-center">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +5% from last month
-              </p>
+              <div className="text-2xl font-bold">${stats.averageSpend.toFixed(2)}</div>
+              <p className="text-xs text-gray-600">Per customer</p>
             </CardContent>
           </Card>
 
@@ -126,7 +140,7 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.rewardsClaimed}</div>
-              <p className="text-xs text-gray-600">This month</p>
+              <p className="text-xs text-gray-600">Total redeemed</p>
             </CardContent>
           </Card>
         </div>
@@ -166,7 +180,7 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
                     <Badge variant="outline">{selectedCustomer.visits} visits</Badge>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Current Points: {selectedCustomer.points}
+                    Current Points: {selectedCustomer.points || 0}
                   </p>
                 </div>
               )}
@@ -198,30 +212,38 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
               <CardTitle>Recent Customers</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentCustomers.map((customer, index) => (
-                  <div
-                    key={customer.phone}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 animate-fade-in"
-                    style={{animationDelay: `${0.6 + index * 0.1}s`}}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <Phone className="h-4 w-4 text-gray-600" />
-                        <span className="font-medium">{customer.name}</span>
+              {customers.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">No customers yet</h3>
+                  <p className="text-gray-500">Add your first customer visit to get started!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {customers.slice(-5).reverse().map((customer, index) => (
+                    <div
+                      key={customer.phone}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 animate-fade-in"
+                      style={{animationDelay: `${0.6 + index * 0.1}s`}}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <Phone className="h-4 w-4 text-gray-600" />
+                          <span className="font-medium">{customer.name}</span>
+                        </div>
+                        <p className="text-sm text-gray-600">{customer.phone}</p>
+                        <p className="text-xs text-gray-500">Last visit: {customer.lastVisit}</p>
                       </div>
-                      <p className="text-sm text-gray-600">{customer.phone}</p>
-                      <p className="text-xs text-gray-500">Last visit: {customer.lastVisit}</p>
+                      <div className="text-right">
+                        <Badge variant="outline" className="mb-1">
+                          {customer.points} points
+                        </Badge>
+                        <p className="text-xs text-gray-600">{customer.visits} visits</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <Badge variant="outline" className="mb-1">
-                        {customer.points} points
-                      </Badge>
-                      <p className="text-xs text-gray-600">{customer.visits} visits</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
