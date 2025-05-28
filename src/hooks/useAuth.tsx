@@ -9,24 +9,14 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    // Check for existing session
-    const getInitialSession = async () => {
+    // Get initial session
+    const getSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error getting session:', error);
         } else {
-          console.log('Initial session check:', session?.user?.id);
+          console.log('Initial session:', session?.user?.email || 'No user');
           setSession(session);
           setUser(session?.user ?? null);
         }
@@ -37,7 +27,17 @@ export const useAuth = () => {
       }
     };
 
-    getInitialSession();
+    getSession();
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email || 'No user');
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, []);
@@ -64,6 +64,6 @@ export const useAuth = () => {
     session,
     loading,
     signOut,
-    isAuthenticated: !!session
+    isAuthenticated: !!session && !!user
   };
 };

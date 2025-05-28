@@ -23,6 +23,7 @@ const Auth = () => {
 
     try {
       if (isLogin) {
+        console.log('Attempting to sign in with:', email);
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password: password
@@ -32,13 +33,16 @@ const Auth = () => {
           console.error('Sign in error:', error);
           if (error.message.includes('Invalid login credentials')) {
             toast.error("Invalid email or password. Please check your credentials and try again.");
+          } else if (error.message.includes('Email not confirmed')) {
+            toast.error("Please check your email and confirm your account before signing in.");
           } else {
             toast.error(error.message);
           }
           return;
         }
         
-        if (data.user) {
+        if (data.user && data.session) {
+          console.log('Sign in successful:', data.user.email);
           toast.success("Successfully signed in!");
           navigate("/dashboard");
         }
@@ -53,9 +57,13 @@ const Auth = () => {
           return;
         }
         
+        console.log('Attempting to sign up with:', email);
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
-          password: password
+          password: password,
+          options: {
+            emailRedirectTo: window.location.origin + '/dashboard'
+          }
         });
         
         if (error) {
@@ -70,8 +78,13 @@ const Auth = () => {
         }
         
         if (data.user) {
-          toast.success("Account created successfully! Please check your email to verify your account.");
-          navigate("/dashboard");
+          console.log('Sign up successful:', data.user.email);
+          if (data.session) {
+            toast.success("Account created successfully! Welcome!");
+            navigate("/dashboard");
+          } else {
+            toast.success("Account created! Please check your email to verify your account.");
+          }
         }
       }
     } catch (error: any) {
@@ -116,6 +129,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
               />
             </div>
@@ -128,6 +142,7 @@ const Auth = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
+                autoComplete={isLogin ? "current-password" : "new-password"}
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10"
               />
               <Button
@@ -150,6 +165,7 @@ const Auth = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   minLength={6}
+                  autoComplete="new-password"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
