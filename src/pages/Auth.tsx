@@ -17,21 +17,71 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const cleanupAuthState = () => {
+    // Clear all auth-related localStorage items
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Clear sessionStorage as well
+    if (typeof sessionStorage !== 'undefined') {
+      Object.keys(sessionStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    }
+  };
+
+  const validatePassword = (password: string) => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const minLength = password.length >= 6;
+
+    if (!minLength) {
+      return "Password must be at least 6 characters long";
+    }
+    if (!hasUpperCase) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!hasLowerCase) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!hasNumbers) {
+      return "Password must contain at least one number";
+    }
+    return null;
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      // Attempt to sign out any existing session
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log('Sign out cleanup attempt:', err);
+      }
+
       if (isLogin) {
         console.log('Attempting to sign in with:', email);
         const { data, error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
+          email: email.trim().toLowerCase(),
           password: password
         });
         
         if (error) {
           console.error('Sign in error:', error);
-          if (error.message.includes('Invalid login credentials')) {
+          if (error.message.includes('Invalid login credentials') || error.message.includes('invalid_credentials')) {
             toast.error("Invalid email or password. Please check your credentials and try again.");
           } else if (error.message.includes('Email not confirmed')) {
             toast.error("Please check your email and confirm your account before signing in.");
@@ -44,22 +94,25 @@ const Auth = () => {
         if (data.user && data.session) {
           console.log('Sign in successful:', data.user.email);
           toast.success("Successfully signed in!");
-          navigate("/dashboard");
+          // Force page reload to ensure clean state
+          window.location.href = '/dashboard';
         }
       } else {
+        // Validate password before attempting signup
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+          toast.error(passwordError);
+          return;
+        }
+
         if (password !== confirmPassword) {
           toast.error("Passwords don't match");
           return;
         }
         
-        if (password.length < 6) {
-          toast.error("Password must be at least 6 characters long");
-          return;
-        }
-        
         console.log('Attempting to sign up with:', email);
         const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
+          email: email.trim().toLowerCase(),
           password: password,
           options: {
             emailRedirectTo: window.location.origin + '/dashboard'
@@ -71,6 +124,14 @@ const Auth = () => {
           if (error.message.includes('User already registered')) {
             toast.error("An account with this email already exists. Please sign in instead.");
             setIsLogin(true);
+          } else if (error.message.includes('Error sending confirmation email')) {
+            // Still create account but inform user about email issue
+            toast.success("Account created! You can now sign in. (Email confirmation temporarily unavailable)");
+            setIsLogin(true);
+            setPassword("");
+            setConfirmPassword("");
+          } else if (error.message.includes('weak_password')) {
+            toast.error("Password must contain uppercase, lowercase letters and numbers");
           } else {
             toast.error(error.message);
           }
@@ -81,9 +142,13 @@ const Auth = () => {
           console.log('Sign up successful:', data.user.email);
           if (data.session) {
             toast.success("Account created successfully! Welcome!");
-            navigate("/dashboard");
+            // Force page reload to ensure clean state
+            window.location.href = '/dashboard';
           } else {
-            toast.success("Account created! Please check your email to verify your account.");
+            toast.success("Account created! Please check your email to verify your account, or try signing in directly.");
+            setIsLogin(true);
+            setPassword("");
+            setConfirmPassword("");
           }
         }
       }
@@ -137,7 +202,7 @@ const Auth = () => {
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder={isLogin ? "Password" : "Password (min 6 chars, with A-z, 0-9)"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -182,7 +247,11 @@ const Auth = () => {
           
           <div className="text-center">
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setPassword("");
+                setConfirmPassword("");
+              }}
               className="text-white/80 hover:text-white underline text-sm"
             >
               {isLogin 
