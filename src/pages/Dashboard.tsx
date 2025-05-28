@@ -23,9 +23,15 @@ const Dashboard = () => {
         // Check user metadata for role
         const role = user.user_metadata?.role;
         console.log('User role from metadata:', role);
-        setUserRole(role || null);
+        
+        if (role === 'business' || role === 'customer') {
+          setUserRole(role);
+        } else {
+          setUserRole(null);
+        }
       } catch (error) {
         console.error('Error getting user role:', error);
+        setUserRole(null);
       } finally {
         setLoading(false);
       }
@@ -36,8 +42,21 @@ const Dashboard = () => {
     }
   }, [user, authLoading]);
 
-  const handleRoleSelected = (role: 'business' | 'customer') => {
-    setUserRole(role);
+  const handleRoleSelected = async (role: 'business' | 'customer') => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { role: role }
+      });
+
+      if (error) {
+        console.error('Error updating user role:', error);
+        return;
+      }
+
+      setUserRole(role);
+    } catch (error) {
+      console.error('Error updating user role:', error);
+    }
   };
 
   if (authLoading || loading) {

@@ -17,20 +17,27 @@ const RoleSelection = ({ onRoleSelected }: RoleSelectionProps) => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
+      if (!user) {
+        toast.error('No user found. Please sign in again.');
+        return;
+      }
 
       // Update user metadata with role
       const { error } = await supabase.auth.updateUser({
         data: { role: role }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Role selection error:', error);
+        toast.error('Failed to set role. Please try again.');
+        return;
+      }
 
       toast.success(`Welcome! You've been registered as a ${role}.`);
       onRoleSelected(role);
     } catch (error: any) {
       console.error('Role selection error:', error);
-      toast.error(error.message || 'Failed to set role');
+      toast.error('Failed to set role. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -50,10 +57,7 @@ const RoleSelection = ({ onRoleSelected }: RoleSelectionProps) => {
         
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card 
-              className="bg-white/5 border-white/20 hover:bg-white/10 transition-all duration-200 cursor-pointer"
-              onClick={() => handleRoleSelection('business')}
-            >
+            <Card className="bg-white/5 border-white/20 hover:bg-white/10 transition-all duration-200">
               <CardContent className="p-8 text-center">
                 <Building2 className="h-16 w-16 text-purple-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">Business Owner</h3>
@@ -70,10 +74,7 @@ const RoleSelection = ({ onRoleSelected }: RoleSelectionProps) => {
               </CardContent>
             </Card>
 
-            <Card 
-              className="bg-white/5 border-white/20 hover:bg-white/10 transition-all duration-200 cursor-pointer"
-              onClick={() => handleRoleSelection('customer')}
-            >
+            <Card className="bg-white/5 border-white/20 hover:bg-white/10 transition-all duration-200">
               <CardContent className="p-8 text-center">
                 <Users className="h-16 w-16 text-cyan-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">Customer</h3>

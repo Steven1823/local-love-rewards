@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,12 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { auth } from "@/lib/firebase";
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  sendEmailVerification 
-} from "firebase/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -27,22 +23,60 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const { user } = await signInWithEmailAndPassword(auth, email, password);
-        toast.success("Successfully signed in!");
-        navigate("/dashboard");
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: password
+        });
+        
+        if (error) {
+          console.error('Sign in error:', error);
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error("Invalid email or password. Please check your credentials and try again.");
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
+        
+        if (data.user) {
+          toast.success("Successfully signed in!");
+          navigate("/dashboard");
+        }
       } else {
         if (password !== confirmPassword) {
           toast.error("Passwords don't match");
           return;
         }
-        const { user } = await createUserWithEmailAndPassword(auth, email, password);
-        await sendEmailVerification(user);
-        toast.success("Account created! Please check your email to verify your account.");
-        navigate("/dashboard");
+        
+        if (password.length < 6) {
+          toast.error("Password must be at least 6 characters long");
+          return;
+        }
+        
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password: password
+        });
+        
+        if (error) {
+          console.error('Sign up error:', error);
+          if (error.message.includes('User already registered')) {
+            toast.error("An account with this email already exists. Please sign in instead.");
+            setIsLogin(true);
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
+        
+        if (data.user) {
+          toast.success("Account created successfully! Please check your email to verify your account.");
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      toast.error(error.message || "An error occurred during authentication");
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,7 +97,7 @@ const Auth = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <CardTitle className="text-2xl font-bold text-white">
-            {isLogin ? "Welcome Back" : "Join Tunza"}
+            {isLogin ? "Welcome Back to Tunza" : "Join Tunza"}
           </CardTitle>
           <p className="text-white/80">
             {isLogin 
@@ -93,6 +127,7 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10"
               />
               <Button
@@ -114,6 +149,7 @@ const Auth = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  minLength={6}
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
