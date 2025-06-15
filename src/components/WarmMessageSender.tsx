@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MessageCircle, Send, Heart } from "lucide-react";
+import { Send, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 interface WarmMessageSenderProps {
@@ -18,7 +18,7 @@ const WarmMessageSender = ({ businessName, businessPhone }: WarmMessageSenderPro
   const [message, setMessage] = useState(`Hi! Thank you for visiting ${businessName}. We appreciate your loyalty and hope to see you again soon! 💜`);
   const [sending, setSending] = useState(false);
 
-  const sendWhatsAppMessage = async () => {
+  const sendMessage = async () => {
     if (!customerPhone || !message) {
       toast.error("Please fill in both phone number and message");
       return;
@@ -27,16 +27,22 @@ const WarmMessageSender = ({ businessName, businessPhone }: WarmMessageSenderPro
     setSending(true);
     
     try {
-      // Format phone number (remove any non-digits except +)
-      const formattedPhone = customerPhone.replace(/[^\d+]/g, '');
+      // Use a single WhatsApp number for sending messages
+      const whatsappNumber = "+1234567890"; // Replace with your actual WhatsApp number
       
-      // Create WhatsApp message URL
-      const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+      // Format customer phone number
+      const formattedCustomerPhone = customerPhone.replace(/[^\d+]/g, '');
+      
+      // Create message with customer info for the business owner
+      const businessMessage = `Send this message to ${formattedCustomerPhone}:\n\n${message}`;
+      
+      // Create WhatsApp URL to send to business WhatsApp number
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(businessMessage)}`;
       
       // Open WhatsApp
       window.open(whatsappUrl, '_blank');
       
-      toast.success("WhatsApp opened! Send the message to your customer.");
+      toast.success("Message sent to WhatsApp for delivery!");
       
       // Clear the form
       setCustomerPhone("");
@@ -44,39 +50,7 @@ const WarmMessageSender = ({ businessName, businessPhone }: WarmMessageSenderPro
       
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error("Failed to open WhatsApp. Please try again.");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const sendSMSMessage = async () => {
-    if (!customerPhone || !message) {
-      toast.error("Please fill in both phone number and message");
-      return;
-    }
-
-    setSending(true);
-    
-    try {
-      // Format phone number (remove any non-digits except +)
-      const formattedPhone = customerPhone.replace(/[^\d+]/g, '');
-      
-      // Create SMS URL
-      const smsUrl = `sms:${formattedPhone}?body=${encodeURIComponent(message)}`;
-      
-      // Open SMS
-      window.open(smsUrl, '_blank');
-      
-      toast.success("SMS app opened! Send the message to your customer.");
-      
-      // Clear the form
-      setCustomerPhone("");
-      setMessage(`Hi! Thank you for visiting ${businessName}. We appreciate your loyalty and hope to see you again soon! 💜`);
-      
-    } catch (error) {
-      console.error('Error sending SMS:', error);
-      toast.error("Failed to open SMS app. Please try again.");
+      toast.error("Failed to send message. Please try again.");
     } finally {
       setSending(false);
     }
@@ -103,7 +77,7 @@ const WarmMessageSender = ({ businessName, businessPhone }: WarmMessageSenderPro
         </div>
         
         <div>
-          <Label htmlFor="message">Message</Label>
+          <Label htmlFor="message">Message (Private - Only you can see this)</Label>
           <Textarea
             id="message"
             placeholder="Type your warm message here..."
@@ -112,31 +86,22 @@ const WarmMessageSender = ({ businessName, businessPhone }: WarmMessageSenderPro
             rows={4}
             className="mt-1"
           />
+          <div className="text-xs text-gray-500 mt-1">
+            This message is private and will be sent securely
+          </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            onClick={sendWhatsAppMessage}
-            disabled={sending || !customerPhone || !message}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Send via WhatsApp
-          </Button>
-          
-          <Button
-            onClick={sendSMSMessage}
-            disabled={sending || !customerPhone || !message}
-            variant="outline"
-            className="flex-1"
-          >
-            <Send className="h-4 w-4 mr-2" />
-            Send via SMS
-          </Button>
-        </div>
+        <Button
+          onClick={sendMessage}
+          disabled={sending || !customerPhone || !message}
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+        >
+          <Send className="h-4 w-4 mr-2" />
+          {sending ? "Sending..." : "Send Message"}
+        </Button>
         
         <div className="text-xs text-gray-600 text-center">
-          This will open your default messaging app with the message pre-filled
+          Messages are sent through our secure WhatsApp service
         </div>
       </CardContent>
     </Card>

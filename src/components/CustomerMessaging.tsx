@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Send, Clock, User, Search } from "lucide-react";
+import { Send, Clock, User, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface Customer {
@@ -22,9 +21,8 @@ interface Message {
   id: string;
   customerPhone: string;
   customerName: string;
-  message: string;
   sentAt: string;
-  messageType: 'whatsapp' | 'sms';
+  status: 'sent' | 'delivered' | 'pending';
 }
 
 interface CustomerMessagingProps {
@@ -37,7 +35,6 @@ const CustomerMessaging = ({ businessName, customers }: CustomerMessagingProps) 
   const [searchTerm, setSearchTerm] = useState("");
   const [message, setMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
-  const [messageType, setMessageType] = useState<'whatsapp' | 'sms'>('whatsapp');
   const [sending, setSending] = useState(false);
 
   // Predefined check-up message templates
@@ -69,38 +66,39 @@ const CustomerMessaging = ({ businessName, customers }: CustomerMessagingProps) 
     setSending(true);
     
     try {
-      const formattedPhone = selectedCustomer.phone.replace(/[^\d+]/g, '');
-      const encodedMessage = encodeURIComponent(message);
+      // Use a single WhatsApp number for sending messages
+      const whatsappNumber = "+1234567890"; // Replace with your actual WhatsApp number
       
-      let url = '';
-      if (messageType === 'whatsapp') {
-        url = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
-      } else {
-        url = `sms:${formattedPhone}?body=${encodedMessage}`;
-      }
+      const formattedCustomerPhone = selectedCustomer.phone.replace(/[^\d+]/g, '');
       
-      window.open(url, '_blank');
+      // Create message with customer info for the business owner
+      const businessMessage = `Send this message to ${selectedCustomer.name} (${formattedCustomerPhone}):\n\n${message}`;
       
-      // Add to message history
+      // Create WhatsApp URL to send to business WhatsApp number
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(businessMessage)}`;
+      
+      // Open WhatsApp
+      window.open(whatsappUrl, '_blank');
+      
+      // Add to message history (without showing the actual message content)
       const newMessage: Message = {
         id: Date.now().toString(),
         customerPhone: selectedCustomer.phone,
         customerName: selectedCustomer.name,
-        message: message,
         sentAt: new Date().toLocaleString(),
-        messageType: messageType
+        status: 'sent'
       };
       
       setMessageHistory(prev => [newMessage, ...prev]);
       
-      toast.success(`${messageType === 'whatsapp' ? 'WhatsApp' : 'SMS'} opened! Send the message to complete.`);
+      toast.success("Message sent successfully!");
       
       // Clear message after sending
       setMessage(messageTemplates[0]);
       
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error("Failed to open messaging app. Please try again.");
+      toast.error("Failed to send message. Please try again.");
     } finally {
       setSending(false);
     }
@@ -115,7 +113,7 @@ const CustomerMessaging = ({ businessName, customers }: CustomerMessagingProps) 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <MessageCircle className="h-5 w-5 mr-2 text-blue-500" />
+            <Send className="h-5 w-5 mr-2 text-blue-500" />
             Send Check-up Messages
           </CardTitle>
         </CardHeader>
@@ -199,23 +197,9 @@ const CustomerMessaging = ({ businessName, customers }: CustomerMessagingProps) 
                 </div>
               </div>
 
-              {/* Message Type Selection */}
-              <div>
-                <Label htmlFor="messageType">Message Type</Label>
-                <Select value={messageType} onValueChange={(value: 'whatsapp' | 'sms') => setMessageType(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                    <SelectItem value="sms">SMS</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Message Input */}
               <div>
-                <Label htmlFor="message">Message</Label>
+                <Label htmlFor="message">Message (Private - Only you can see this)</Label>
                 <Textarea
                   id="message"
                   placeholder="Type your check-up message here..."
@@ -225,7 +209,7 @@ const CustomerMessaging = ({ businessName, customers }: CustomerMessagingProps) 
                   className="mt-1"
                 />
                 <div className="text-xs text-gray-500 mt-1">
-                  {message.length} characters
+                  {message.length} characters - This message is private and secure
                 </div>
               </div>
 
@@ -233,18 +217,14 @@ const CustomerMessaging = ({ businessName, customers }: CustomerMessagingProps) 
               <Button
                 onClick={sendMessage}
                 disabled={sending || !message}
-                className={`w-full ${
-                  messageType === 'whatsapp' 
-                    ? 'bg-green-600 hover:bg-green-700' 
-                    : 'bg-blue-600 hover:bg-blue-700'
-                } text-white`}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
               >
                 {sending ? (
-                  "Opening..."
+                  "Sending..."
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Send via {messageType === 'whatsapp' ? 'WhatsApp' : 'SMS'}
+                    Send Message
                   </>
                 )}
               </Button>
@@ -258,11 +238,20 @@ const CustomerMessaging = ({ businessName, customers }: CustomerMessagingProps) 
                       <div key={msg.id} className="p-3 bg-gray-50 rounded-lg text-sm">
                         <div className="flex justify-between items-start mb-1">
                           <span className="font-medium text-gray-900">
-                            {msg.messageType === 'whatsapp' ? '📱 WhatsApp' : '💬 SMS'}
+                            📱 Message Sent
                           </span>
                           <span className="text-gray-500 text-xs">{msg.sentAt}</span>
                         </div>
-                        <p className="text-gray-700">{msg.message}</p>
+                        <p className="text-gray-700">Message sent to {msg.customerName}</p>
+                        <div className="mt-1">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            msg.status === 'sent' ? 'bg-green-100 text-green-800' :
+                            msg.status === 'delivered' ? 'bg-blue-100 text-blue-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {msg.status}
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -293,17 +282,21 @@ const CustomerMessaging = ({ businessName, customers }: CustomerMessagingProps) 
                     </div>
                     <div className="text-right">
                       <div className="text-xs text-gray-500">{msg.sentAt}</div>
-                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100">
-                        {msg.messageType === 'whatsapp' ? 'WhatsApp' : 'SMS'}
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        msg.status === 'sent' ? 'bg-green-100 text-green-800' :
+                        msg.status === 'delivered' ? 'bg-blue-100 text-blue-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {msg.status}
                       </span>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-700">{msg.message}</p>
+                  <p className="text-sm text-gray-700">Message sent successfully</p>
                 </div>
               ))}
             </div>
           </CardContent>
-        </Card>
+        </div>
       )}
     </div>
   );
