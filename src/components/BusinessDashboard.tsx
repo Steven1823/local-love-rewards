@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ArrowLeft, Users, TrendingUp, DollarSign, Star, Phone, Search, Plus, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CustomerMessaging from "./CustomerMessaging";
 import WarmMessageSender from "./WarmMessageSender";
+import AICustomerAssistant from "./AICustomerAssistant";
+import AutomatedAIMessaging from "./AutomatedAIMessaging";
 
 interface BusinessDashboardProps {
   businessPhone?: string | null;
@@ -150,14 +151,22 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="add-visit" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="add-visit" className="flex items-center">
               <Plus className="h-4 w-4 mr-2" />
               Add Visit
             </TabsTrigger>
+            <TabsTrigger value="ai-assistant" className="flex items-center">
+              <Star className="h-4 w-4 mr-2" />
+              AI Assistant
+            </TabsTrigger>
+            <TabsTrigger value="auto-messaging" className="flex items-center">
+              <Star className="h-4 w-4 mr-2" />
+              Auto AI Messages
+            </TabsTrigger>
             <TabsTrigger value="messaging" className="flex items-center">
               <MessageCircle className="h-4 w-4 mr-2" />
-              Customer Messages
+              Manual Messages
             </TabsTrigger>
             <TabsTrigger value="warm-messages" className="flex items-center">
               <Star className="h-4 w-4 mr-2" />
@@ -268,6 +277,20 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="ai-assistant">
+            <AICustomerAssistant 
+              customers={customers}
+              businessName="Your Business"
+            />
+          </TabsContent>
+
+          <TabsContent value="auto-messaging">
+            <AutomatedAIMessaging 
+              customers={customers}
+              businessName="Your Business"
+            />
           </TabsContent>
 
           <TabsContent value="messaging">
