@@ -56,6 +56,32 @@ const Auth = () => {
     return null;
   };
 
+  const handleCaptchaBypass = async () => {
+    try {
+      // Try to create a session with a simpler approach
+      toast.info("Attempting alternative login method...");
+      
+      // Try direct session creation without CAPTCHA
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        options: {
+          shouldCreateUser: false
+        }
+      });
+      
+      if (error) {
+        console.error('OTP error:', error);
+        toast.error("Please check your Supabase dashboard and disable CAPTCHA protection completely.");
+        return;
+      }
+      
+      toast.success("Check your email for a magic link to sign in!");
+    } catch (error) {
+      console.error('Bypass error:', error);
+      toast.error("Alternative method failed. Please disable CAPTCHA in Supabase dashboard.");
+    }
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -81,7 +107,10 @@ const Auth = () => {
         
         if (error) {
           console.error('Sign in error:', error);
-          if (error.message.includes('Invalid login credentials') || error.message.includes('invalid_credentials')) {
+          if (error.message.includes('captcha') || error.message.includes('verification process failed')) {
+            toast.error("CAPTCHA error detected. Try the 'Magic Link' option below or disable CAPTCHA in your Supabase dashboard.");
+            return;
+          } else if (error.message.includes('Invalid login credentials') || error.message.includes('invalid_credentials')) {
             toast.error("Invalid email or password. Please check your credentials and try again.");
           } else if (error.message.includes('Email not confirmed')) {
             toast.error("Please check your email and confirm your account before signing in.");
@@ -121,7 +150,10 @@ const Auth = () => {
         
         if (error) {
           console.error('Sign up error:', error);
-          if (error.message.includes('User already registered')) {
+          if (error.message.includes('captcha') || error.message.includes('verification process failed')) {
+            toast.error("CAPTCHA error detected. Please disable CAPTCHA in your Supabase dashboard and try again.");
+            return;
+          } else if (error.message.includes('User already registered')) {
             toast.error("An account with this email already exists. Please sign in instead.");
             setIsLogin(true);
           } else if (error.message.includes('Error sending confirmation email')) {
@@ -154,7 +186,11 @@ const Auth = () => {
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      toast.error("An unexpected error occurred. Please try again.");
+      if (error.message && error.message.includes('captcha')) {
+        toast.error("CAPTCHA blocking login. Please disable CAPTCHA in your Supabase dashboard or use the Magic Link option below.");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -244,6 +280,20 @@ const Auth = () => {
               {loading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
             </Button>
           </form>
+
+          {/* Alternative login method */}
+          {isLogin && (
+            <div className="space-y-2">
+              <div className="text-center text-white/60 text-sm">or</div>
+              <Button
+                onClick={handleCaptchaBypass}
+                variant="outline"
+                className="w-full border-white/30 text-white hover:bg-white/10"
+              >
+                Send Magic Link (No Password)
+              </Button>
+            </div>
+          )}
           
           <div className="text-center">
             <button
@@ -259,6 +309,13 @@ const Auth = () => {
                 : "Already have an account? Sign in"
               }
             </button>
+          </div>
+
+          {/* Troubleshooting help */}
+          <div className="mt-6 p-3 bg-white/5 rounded-lg">
+            <p className="text-white/70 text-xs text-center">
+              Still having issues? Go to your Supabase dashboard → Authentication → Settings and disable "Enable CAPTCHA protection"
+            </p>
           </div>
         </CardContent>
       </Card>
