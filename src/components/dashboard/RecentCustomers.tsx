@@ -2,6 +2,7 @@
 import { Users, Phone } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatKsh } from "@/utils/currency";
 
 interface Customer {
   phone: string;
@@ -45,6 +46,7 @@ const RecentCustomers = ({ customers }: RecentCustomersProps) => {
                   </div>
                   <p className="text-sm text-gray-600">{customer.phone}</p>
                   <p className="text-xs text-gray-500">Last visit: {customer.lastVisit}</p>
+                  <p className="text-xs text-green-600">Total spent: {formatKsh(customer.totalSpent)}</p>
                 </div>
                 <div className="text-right">
                   <Badge variant="outline" className="mb-1">

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { formatKsh, USD_TO_KSH_RATE } from "@/utils/currency";
+import { USD_TO_KSH_RATE } from "@/utils/currency";
 
 interface Customer {
   phone: string;
@@ -19,33 +20,51 @@ interface Customer {
 
 interface AddVisitFormProps {
   customers: Customer[];
-  onAddVisit: (phone: string, amount: number) => void;
+  onAddVisit: (phone: string, amountUSD: number) => Promise<void>;
 }
 
 const AddVisitForm = ({ customers, onAddVisit }: AddVisitFormProps) => {
   const [searchPhone, setSearchPhone] = useState('');
   const [purchaseAmount, setPurchaseAmount] = useState('');
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleAddVisit = () => {
+  const handleAddVisit = async () => {
     if (!searchPhone || !purchaseAmount) return;
     
-    // Convert KSh to USD for internal storage (keeping existing logic)
-    const kshAmount = parseFloat(purchaseAmount);
-    const usdAmount = kshAmount / USD_TO_KSH_RATE;
-    onAddVisit(searchPhone, usdAmount);
-    
-    // Reset form
-    setSearchPhone('');
-    setPurchaseAmount('');
-    setSelectedCustomer(null);
+    try {
+      setLoading(true);
+      
+      // Convert KSh to USD for internal processing
+      const kshAmount = parseFloat(purchaseAmount);
+      const usdAmount = kshAmount / USD_TO_KSH_RATE;
+      
+      await onAddVisit(searchPhone, usdAmount);
+      
+      // Reset form
+      setSearchPhone('');
+      setPurchaseAmount('');
+      setSelectedCustomer(null);
+    } catch (error) {
+      console.error('Error adding visit:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSearchCustomer = () => {
     if (!searchPhone) return;
     
     const customer = customers.find(c => c.phone === searchPhone);
-    setSelectedCustomer(customer || { phone: searchPhone, name: "New Customer", visits: 0, points: 0 });
+    setSelectedCustomer(customer || { 
+      phone: searchPhone, 
+      name: "New Customer", 
+      visits: 0, 
+      points: 0,
+      totalSpent: 0,
+      lastVisit: 'Never',
+      rewardsClaimed: 0
+    });
   };
 
   return (
@@ -62,7 +81,7 @@ const AddVisitForm = ({ customers, onAddVisit }: AddVisitFormProps) => {
             <Label htmlFor="phone">Customer Phone</Label>
             <Input
               id="phone"
-              placeholder="(555) 123-4567"
+              placeholder="+254712345678"
               value={searchPhone}
               onChange={(e) => setSearchPhone(e.target.value)}
             />
@@ -70,6 +89,7 @@ const AddVisitForm = ({ customers, onAddVisit }: AddVisitFormProps) => {
           <Button
             onClick={handleSearchCustomer}
             className="mt-6 bg-black text-white hover:bg-gray-800"
+            disabled={loading}
           >
             <Search className="h-4 w-4" />
           </Button>
@@ -104,9 +124,9 @@ const AddVisitForm = ({ customers, onAddVisit }: AddVisitFormProps) => {
         <Button
           onClick={handleAddVisit}
           className="w-full bg-black text-white hover:bg-gray-800 transform hover:scale-105 transition-all duration-200"
-          disabled={!searchPhone || !purchaseAmount}
+          disabled={!searchPhone || !purchaseAmount || loading}
         >
-          Add Visit & Points
+          {loading ? 'Adding...' : 'Add Visit & Points'}
         </Button>
       </CardContent>
     </Card>
