@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { formatKsh, USD_TO_KSH_RATE } from "@/utils/currency";
 
 interface Customer {
   phone: string;
@@ -30,8 +30,10 @@ const AddVisitForm = ({ customers, onAddVisit }: AddVisitFormProps) => {
   const handleAddVisit = () => {
     if (!searchPhone || !purchaseAmount) return;
     
-    const amount = parseFloat(purchaseAmount);
-    onAddVisit(searchPhone, amount);
+    // Convert KSh to USD for internal storage (keeping existing logic)
+    const kshAmount = parseFloat(purchaseAmount);
+    const usdAmount = kshAmount / USD_TO_KSH_RATE;
+    onAddVisit(searchPhone, usdAmount);
     
     // Reset form
     setSearchPhone('');
@@ -86,14 +88,17 @@ const AddVisitForm = ({ customers, onAddVisit }: AddVisitFormProps) => {
         )}
 
         <div>
-          <Label htmlFor="amount">Purchase Amount ($)</Label>
+          <Label htmlFor="amount">Purchase Amount (KSh)</Label>
           <Input
             id="amount"
             type="number"
-            placeholder="25.00"
+            placeholder="3250"
             value={purchaseAmount}
             onChange={(e) => setPurchaseAmount(e.target.value)}
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Enter amount in Kenyan Shillings
+          </p>
         </div>
 
         <Button

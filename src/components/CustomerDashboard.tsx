@@ -6,6 +6,7 @@ import { ArrowLeft, Gift, Star, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { formatKsh, USD_TO_KSH_RATE } from "@/utils/currency";
 
 interface CustomerDashboardProps {
   phoneNumber: string;
@@ -127,7 +128,7 @@ const CustomerDashboard = ({ phoneNumber, onBack }: CustomerDashboardProps) => {
                       <div className="text-white/70 text-sm">Visits</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-400">${customer.total_spent}</div>
+                      <div className="text-2xl font-bold text-blue-400">{formatKsh(customer.total_spent * USD_TO_KSH_RATE)}</div>
                       <div className="text-white/70 text-sm">Total Spent</div>
                     </div>
                   </div>

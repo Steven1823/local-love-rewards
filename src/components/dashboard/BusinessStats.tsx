@@ -1,6 +1,7 @@
 
 import { Users, Star, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatKsh } from "@/utils/currency";
 
 interface BusinessStatsProps {
   stats: {
@@ -42,7 +43,7 @@ const BusinessStats = ({ stats }: BusinessStatsProps) => {
           <DollarSign className="h-4 w-4 text-gray-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${stats.averageSpend.toFixed(2)}</div>
+          <div className="text-2xl font-bold">{formatKsh(stats.averageSpend * 129.50)}</div>
           <p className="text-xs text-gray-600">Per customer</p>
         </CardContent>
       </Card>
