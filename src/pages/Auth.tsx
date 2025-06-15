@@ -20,11 +20,10 @@ const Auth = () => {
   const usdToKshRate = 129.50; // Current approximate rate
   
   const convertToKsh = (usdAmount: number) => {
-    return (usdAmount * usdToKshRate).toLocaleString('en-KE', {
-      style: 'currency',
-      currency: 'KES',
+    return `KSh ${(usdAmount * usdToKshRate).toLocaleString('en-KE', {
       minimumFractionDigits: 0,
-    });
+      maximumFractionDigits: 0,
+    })}`;
   };
 
   const cleanupAuthState = () => {
@@ -221,7 +220,7 @@ const Auth = () => {
         <div className="bg-green-600/20 backdrop-blur-md border border-green-400/30 rounded-full px-6 py-2 flex items-center space-x-2">
           <DollarSign className="h-4 w-4 text-green-300" />
           <span className="text-green-100 text-sm font-medium">
-            1 USD = {convertToKsh(1).replace('KES', 'KSh')}
+            $1 USD = {convertToKsh(1)}
           </span>
         </div>
       </div>
@@ -249,7 +248,7 @@ const Auth = () => {
           {/* Sample pricing in KSh */}
           <div className="mt-4 p-3 bg-gradient-to-r from-green-600/10 to-emerald-600/10 rounded-lg border border-green-400/20">
             <p className="text-green-200 text-sm">
-              Premium Plan: <span className="font-bold text-green-100">{convertToKsh(9.99).replace('KES', 'KSh')}</span>/month
+              Premium Plan: <span className="font-bold text-green-100">{convertToKsh(9.99)}</span>/month
             </p>
           </div>
         </CardHeader>
@@ -375,7 +374,7 @@ const Auth = () => {
           {/* KSh Information */}
           <div className="mt-4 p-3 bg-green-800/20 rounded-lg border border-green-500/20">
             <p className="text-green-200/90 text-xs text-center">
-              💰 All prices displayed in Kenyan Shillings (KSh) • Exchange rate updated daily
+              💰 All prices displayed in Kenyan Shillings ({convertToKsh(1)} = $1 USD) • Exchange rate updated daily
             </p>
           </div>
         </CardContent>
