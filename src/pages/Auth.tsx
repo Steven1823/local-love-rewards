@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Eye, EyeOff, DollarSign } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, DollarSign, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,6 +16,15 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { wasLoggedIn, getSavedEmail } = useAuth();
+
+  // Pre-fill email if user was previously logged in
+  useEffect(() => {
+    const savedEmail = getSavedEmail();
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, [getSavedEmail]);
 
   // Currency conversion rate (USD to KSH - you can make this dynamic later)
   const usdToKshRate = 129.50; // Current approximate rate
@@ -27,9 +37,10 @@ const Auth = () => {
   };
 
   const cleanupAuthState = () => {
-    // Clear all auth-related localStorage items
+    // Clear all auth-related localStorage items except our saved login info
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      if ((key.startsWith('supabase.auth.') || key.includes('sb-')) && 
+          !key.includes('tunza_user')) {
         localStorage.removeItem(key);
       }
     });
@@ -96,7 +107,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Clean up any existing auth state first
+      // Clean up any existing auth state first (but preserve our saved login info)
       cleanupAuthState();
       
       // Attempt to sign out any existing session
@@ -131,7 +142,7 @@ const Auth = () => {
         
         if (data.user && data.session) {
           console.log('Sign in successful:', data.user.email);
-          toast.success("Successfully signed in!");
+          toast.success("Successfully signed in! Your login has been saved.");
           // Force page reload to ensure clean state
           window.location.href = '/dashboard';
         }
@@ -182,7 +193,7 @@ const Auth = () => {
         if (data.user) {
           console.log('Sign up successful:', data.user.email);
           if (data.session) {
-            toast.success("Account created successfully! Welcome!");
+            toast.success("Account created successfully! Your login has been saved. Welcome!");
             // Force page reload to ensure clean state
             window.location.href = '/dashboard';
           } else {
@@ -244,6 +255,16 @@ const Auth = () => {
               : "Create your account and start saving in Kenyan Shillings"
             }
           </p>
+          
+          {/* Show saved login info if available */}
+          {wasLoggedIn() && getSavedEmail() && isLogin && (
+            <div className="mt-3 p-3 bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-lg border border-green-400/30">
+              <div className="flex items-center space-x-2 text-green-200">
+                <User className="h-4 w-4" />
+                <span className="text-sm">Previously signed in as: {getSavedEmail()}</span>
+              </div>
+            </div>
+          )}
           
           {/* Sample pricing in KSh */}
           <div className="mt-4 p-3 bg-gradient-to-r from-green-600/10 to-emerald-600/10 rounded-lg border border-green-400/20">
@@ -370,6 +391,15 @@ const Auth = () => {
               </div>
             </div>
           </div>
+
+          {/* Login saved notification */}
+          {isLogin && (
+            <div className="mt-4 p-3 bg-green-800/20 rounded-lg border border-green-500/20">
+              <p className="text-green-200/90 text-xs text-center">
+                🔒 Your login will be saved securely for easy access next time
+              </p>
+            </div>
+          )}
 
           {/* KSh Information */}
           <div className="mt-4 p-3 bg-green-800/20 rounded-lg border border-green-500/20">

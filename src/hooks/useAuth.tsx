@@ -16,22 +16,37 @@ export const useAuth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Save login state to localStorage for persistence
+        if (session) {
+          localStorage.setItem('tunza_user_logged_in', 'true');
+          localStorage.setItem('tunza_user_email', session.user.email || '');
+        } else {
+          localStorage.removeItem('tunza_user_logged_in');
+          localStorage.removeItem('tunza_user_email');
+        }
       }
     );
 
-    // Then get initial session
+    // Then get initial session - this will restore saved login
     const getSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error getting session:', error);
         } else {
-          console.log('Initial session:', session?.user?.email || 'No user');
+          console.log('Initial session restored:', session?.user?.email || 'No user');
           setSession(session);
           setUser(session?.user ?? null);
+          
+          // Update login state
+          if (session) {
+            localStorage.setItem('tunza_user_logged_in', 'true');
+            localStorage.setItem('tunza_user_email', session.user.email || '');
+          }
         }
       } catch (error) {
-        console.error('Session check error:', error);
+        console.error('Session restoration error:', error);
       } finally {
         setLoading(false);
       }
@@ -45,6 +60,10 @@ export const useAuth = () => {
   const signOut = async () => {
     try {
       setLoading(true);
+      
+      // Clear saved login info
+      localStorage.removeItem('tunza_user_logged_in');
+      localStorage.removeItem('tunza_user_email');
       
       // Clean up auth state
       Object.keys(localStorage).forEach((key) => {
@@ -70,11 +89,23 @@ export const useAuth = () => {
     }
   };
 
+  // Helper function to check if user was previously logged in
+  const wasLoggedIn = () => {
+    return localStorage.getItem('tunza_user_logged_in') === 'true';
+  };
+
+  // Helper function to get saved email
+  const getSavedEmail = () => {
+    return localStorage.getItem('tunza_user_email') || '';
+  };
+
   return {
     user,
     session,
     loading,
     signOut,
-    isAuthenticated: !!session && !!user
+    isAuthenticated: !!session && !!user,
+    wasLoggedIn,
+    getSavedEmail
   };
 };
