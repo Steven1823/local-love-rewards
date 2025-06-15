@@ -111,7 +111,8 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
       
       // Convert USD to KSh for storage (maintain consistency)
       const kshAmount = amountUSD * 129.50;
-      const points = Math.floor(amountUSD); // 1 point per USD spent
+      // Reduced points: 1 point per $5 spent (instead of 1 point per $1)
+      const points = Math.floor(amountUSD / 5);
 
       // Find or create customer
       let { data: customer, error: customerError } = await supabase
