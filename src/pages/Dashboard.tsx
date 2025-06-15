@@ -7,6 +7,7 @@ import RoleSelection from "@/components/RoleSelection";
 import { Button } from "@/components/ui/button";
 import { Bot, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import FloatingAIChat from "@/components/FloatingAIChat";
 
 const Dashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -119,6 +120,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <DashboardHeader />
       <CustomerDashboard phoneNumber={user.phone || ''} onBack={() => {}} />
+      <FloatingAIChat customerPhone={user.phone || ''} />
     </div>
   );
 };
