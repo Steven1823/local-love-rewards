@@ -1,5 +1,5 @@
 
-import { ArrowRight, Gift, Star, Users, Zap, ChevronDown } from "lucide-react";
+import { ArrowRight, Gift, Star, Users, Zap, ChevronDown, Phone, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -14,61 +14,91 @@ const Hero = ({ onStartSetup, onCheckRewards }: HeroProps) => {
   return (
     <>
       {/* Hero Section */}
-      <div className="relative z-10 px-6 py-20 text-center">
-        <div className="max-w-4xl mx-auto">
-          <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm mb-8 animate-fade-in">
-            <Zap className="w-4 h-4 mr-2 text-yellow-400" />
-            Free to start • Works for any business
+      <div className="relative z-10 px-6 py-16 text-center">
+        <div className="max-w-5xl mx-auto">
+          {/* Trust Badge */}
+          <div className="inline-flex items-center px-6 py-3 bg-white/15 backdrop-blur-sm rounded-full text-white/90 text-sm mb-8 animate-fade-in border border-white/20">
+            <Shield className="w-4 h-4 mr-2 text-green-400" />
+            100% Free • No Hidden Fees • Instant Setup
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
-            Turn Every Visit Into
-            <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent animate-shimmer bg-300% animate-pulse-subtle">
-              Lasting Loyalty
+          {/* Main Headline */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 animate-fade-in leading-tight">
+            Simple Loyalty
+            <span className="block bg-gradient-to-r from-purple-300 via-pink-300 to-cyan-300 bg-clip-text text-transparent mt-2">
+              Real Results
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-3xl mx-auto animate-fade-in">
-            Revolutionary phone-based rewards system for businesses and organizations. 
-            No apps to download, no complicated setups. Just phone numbers and instant rewards.
+          {/* Subheadline */}
+          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-3xl mx-auto animate-fade-in leading-relaxed">
+            The easiest way to reward loyal customers. No apps to download, no complicated setup. 
+            Just phone numbers and happy customers.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in">
+          {/* Key Benefits */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 max-w-4xl mx-auto animate-fade-in">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <Phone className="w-6 h-6 text-blue-300 mx-auto mb-2" />
+              <p className="text-white/90 font-medium">Phone-Based</p>
+              <p className="text-white/70 text-sm">No apps needed</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <Zap className="w-6 h-6 text-yellow-300 mx-auto mb-2" />
+              <p className="text-white/90 font-medium">5-Min Setup</p>
+              <p className="text-white/70 text-sm">Ready instantly</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <Gift className="w-6 h-6 text-green-300 mx-auto mb-2" />
+              <p className="text-white/90 font-medium">100% Free</p>
+              <p className="text-white/70 text-sm">Forever</p>
+            </div>
+          </div>
+
+          {/* Call-to-Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in mb-8">
             <Button
               onClick={() => navigate("/auth")}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-glow"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-10 py-4 text-lg font-bold rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 border-2 border-white/20 hover:border-white/30"
             >
-              Get Started Free
+              Start Free Now
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button
               onClick={onCheckRewards}
               variant="outline"
-              className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-semibold rounded-xl transform hover:scale-105 transition-all duration-300"
+              className="border-2 border-white/40 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm px-10 py-4 text-lg font-bold rounded-xl transform hover:scale-105 transition-all duration-300"
             >
-              Check My Rewards
+              Check My Points
               <Gift className="ml-2 h-5 w-5" />
             </Button>
           </div>
 
-          <div className="mt-12 text-white/60 animate-fade-in">
-            <div className="flex items-center justify-center space-x-6">
+          {/* Social Proof */}
+          <div className="text-white/70 animate-fade-in">
+            <p className="text-sm mb-4">Trusted by businesses everywhere</p>
+            <div className="flex items-center justify-center space-x-8 text-xs">
               <div className="flex items-center">
-                <Star className="w-5 h-5 text-yellow-400 mr-1" />
-                <span>Easy Setup</span>
+                <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                <span>Easy to Use</span>
               </div>
               <div className="w-1 h-1 bg-white/40 rounded-full"></div>
               <div className="flex items-center">
-                <Users className="w-5 h-5 text-green-400 mr-1" />
+                <Users className="w-4 h-4 text-green-400 mr-1" />
                 <span>For All Businesses</span>
+              </div>
+              <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+              <div className="flex items-center">
+                <Shield className="w-4 h-4 text-blue-400 mr-1" />
+                <span>Always Free</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-gentle">
-          <ChevronDown className="w-6 h-6 text-white/60" />
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <ChevronDown className="w-6 h-6 text-white/50" />
         </div>
       </div>
     </>
