@@ -24,7 +24,7 @@ const CustomerAIChat = ({ customerPhone, businessContext }: CustomerAIChatProps)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hi! I'm your AI assistant. I can help answer questions about rewards, loyalty points, business hours, and more. How can I help you today?",
+      content: "🎉 Welcome to Tunza Rewards! I'm your AI assistant and I'm excited to help you discover how our loyalty program works!\n\n✨ Here's what makes Tunza special:\n• Earn points just by visiting participating businesses\n• No apps to download - just use your phone number\n• Redeem rewards when you're ready\n• Track your loyalty across multiple businesses\n\nI can help answer questions about rewards, how to earn points, finding participating businesses, or anything else about Tunza Rewards. What would you like to know?",
       isUser: false,
       timestamp: new Date()
     }
@@ -47,21 +47,33 @@ const CustomerAIChat = ({ customerPhone, businessContext }: CustomerAIChatProps)
     setIsLoading(true);
 
     try {
-      const systemPrompt = `You are a helpful AI assistant for a customer loyalty app. 
-      ${businessContext ? `Business context: ${businessContext}` : ''}
-      ${customerPhone ? `Customer phone: ${customerPhone}` : ''}
+      const systemPrompt = `You are a friendly AI assistant for Tunza Rewards, a customer loyalty platform. Your role is to welcome users and explain how the app works.
+
+      Key information about Tunza Rewards:
+      - It's a phone-based loyalty system (no app downloads needed)
+      - Customers earn points by visiting participating businesses
+      - Points can be redeemed for rewards
+      - Works across multiple businesses
+      - Simple and accessible to everyone
+      - Currently FREE to use for both businesses and customers
       
-      You can help customers with:
-      - Questions about their loyalty points and rewards
-      - Information about the business (hours, location, services)
-      - How to earn and redeem points
-      - General customer service inquiries
+      ${businessContext ? `Additional context: ${businessContext}` : ''}
+      ${customerPhone ? `User phone: ${customerPhone}` : ''}
       
-      Be friendly, helpful, and concise. If you don't know specific business details, suggest they contact the business directly.`;
+      You should:
+      - Be enthusiastic and welcoming
+      - Explain features clearly and simply
+      - Encourage users to try the platform
+      - Answer questions about how loyalty programs work
+      - If you don't know specific business details, suggest they contact businesses directly
+      - Always maintain a positive, helpful tone
+      - Use emojis appropriately to make conversations friendly
+      
+      Keep responses concise but informative.`;
 
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
         body: { 
-          prompt: `${systemPrompt}\n\nCustomer question: ${inputValue}`,
+          prompt: `${systemPrompt}\n\nUser question: ${inputValue}`,
           model: 'gemini-1.5-flash'
         }
       });
@@ -70,7 +82,7 @@ const CustomerAIChat = ({ customerPhone, businessContext }: CustomerAIChatProps)
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.generatedText || "I'm sorry, I couldn't process your request right now. Please try again.",
+        content: data.generatedText || "I'm sorry, I couldn't process your request right now. Please try again! 😊",
         isUser: false,
         timestamp: new Date()
       };
@@ -82,7 +94,7 @@ const CustomerAIChat = ({ customerPhone, businessContext }: CustomerAIChatProps)
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I'm having trouble connecting right now. Please try again in a moment or contact the business directly for assistance.",
+        content: "I'm having trouble connecting right now. But don't worry! Tunza Rewards is designed to be simple - just visit participating businesses and provide your phone number to start earning points! 🌟",
         isUser: false,
         timestamp: new Date()
       };
@@ -105,7 +117,7 @@ const CustomerAIChat = ({ customerPhone, businessContext }: CustomerAIChatProps)
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center text-lg">
           <Bot className="h-5 w-5 mr-2 text-blue-500" />
-          AI Assistant
+          Tunza AI Assistant
         </CardTitle>
       </CardHeader>
       
@@ -132,7 +144,7 @@ const CustomerAIChat = ({ customerPhone, businessContext }: CustomerAIChatProps)
                       : 'bg-gray-100 text-gray-900'
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm whitespace-pre-line">{message.content}</p>
                   <p className="text-xs mt-1 opacity-70">
                     {message.timestamp.toLocaleTimeString([], { 
                       hour: '2-digit', 
@@ -172,7 +184,7 @@ const CustomerAIChat = ({ customerPhone, businessContext }: CustomerAIChatProps)
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask me anything..."
+              placeholder="Ask me about Tunza Rewards..."
               disabled={isLoading}
               className="flex-1"
             />

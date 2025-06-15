@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,15 +6,13 @@ import BusinessDashboard from "@/components/BusinessDashboard";
 import CustomerDashboard from "@/components/CustomerDashboard";
 import RoleSelection from "@/components/RoleSelection";
 import { Button } from "@/components/ui/button";
-import { Bot, Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import FloatingAIChat from "@/components/FloatingAIChat";
 
 const Dashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const [userRole, setUserRole] = useState<'business' | 'customer' | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getUserRole = async () => {
@@ -82,27 +81,21 @@ const Dashboard = () => {
     return <RoleSelection onRoleSelected={handleRoleSelected} />;
   }
 
-  // Add navigation header with AI chat access
+  // Simplified navigation header without Gemini
   const DashboardHeader = () => (
     <div className="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-6">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <div className="flex items-center space-x-4">
-          <Button
-            onClick={() => navigate("/gemini")}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
-          >
-            <Bot className="h-4 w-4 mr-2" />
-            AI Chat
-          </Button>
-          <Button
-            onClick={signOut}
-            variant="outline"
-            className="border-white/30 text-white hover:bg-white/10"
-          >
-            Sign Out
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+          <p className="text-white/80">Welcome to Tunza Rewards - Free forever!</p>
         </div>
+        <Button
+          onClick={signOut}
+          variant="outline"
+          className="border-white/30 text-white hover:bg-white/10"
+        >
+          Sign Out
+        </Button>
       </div>
     </div>
   );
@@ -120,7 +113,10 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <DashboardHeader />
       <CustomerDashboard phoneNumber={user.phone || ''} onBack={() => {}} />
-      <FloatingAIChat customerPhone={user.phone || ''} />
+      <FloatingAIChat 
+        customerPhone={user.phone || ''} 
+        businessContext="Welcome to Tunza Rewards - your free loyalty platform!"
+      />
     </div>
   );
 };
