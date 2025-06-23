@@ -11,18 +11,18 @@ const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="relative z-20 px-6 py-4 bg-white/5 backdrop-blur-sm border-b border-white/10">
+    <nav className="relative z-20 px-4 sm:px-6 py-3 sm:py-4 bg-white/5 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <div 
-          className="flex items-center space-x-3 cursor-pointer hover:scale-105 transition-transform duration-200"
+          className="flex items-center space-x-2 sm:space-x-3 cursor-pointer hover:scale-105 transition-transform duration-200"
           onClick={() => navigate("/")}
         >
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center shadow-lg">
-            <Heart className="h-6 w-6 text-white" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-xl flex items-center justify-center shadow-lg">
+            <Heart className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
           </div>
           <div>
-            <span className="text-2xl font-bold text-white">Tunza</span>
+            <span className="text-xl sm:text-2xl font-bold text-white">Tunza</span>
             <div className="text-xs text-white/60 -mt-1">Rewards</div>
           </div>
         </div>
@@ -67,7 +67,7 @@ const Navigation = () => {
           ) : (
             <Button
               onClick={() => navigate("/auth")}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 sm:px-6 py-2 font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <User className="h-4 w-4 mr-2" />
               Get Started
@@ -79,26 +79,26 @@ const Navigation = () => {
         <Button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           variant="ghost"
-          className="md:hidden text-white hover:bg-white/10"
+          className="md:hidden text-white hover:bg-white/10 p-2 min-h-[44px] min-w-[44px]"
         >
-          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-black/90 backdrop-blur-lg border-b border-white/10 animate-fade-in">
-          <div className="px-6 py-4 space-y-4">
+          <div className="px-4 sm:px-6 py-4 space-y-4">
             <a 
               href="#features" 
-              className="block text-white/80 hover:text-white py-2 transition-colors"
+              className="block text-white/80 hover:text-white py-3 transition-colors text-base"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Features
             </a>
             <a 
               href="#how-it-works" 
-              className="block text-white/80 hover:text-white py-2 transition-colors"
+              className="block text-white/80 hover:text-white py-3 transition-colors text-base"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               How It Works
@@ -111,7 +111,7 @@ const Navigation = () => {
                       navigate("/dashboard");
                       setIsMobileMenuOpen(false);
                     }}
-                    className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/30"
+                    className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/30 min-h-[48px] text-base"
                   >
                     Dashboard
                   </Button>
@@ -121,7 +121,7 @@ const Navigation = () => {
                       setIsMobileMenuOpen(false);
                     }}
                     variant="outline"
-                    className="w-full border-white/30 text-white hover:bg-white/10"
+                    className="w-full border-white/30 text-white hover:bg-white/10 min-h-[48px] text-base"
                   >
                     Sign Out
                   </Button>
@@ -132,7 +132,7 @@ const Navigation = () => {
                     navigate("/auth");
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold"
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold min-h-[48px] text-base"
                 >
                   <User className="h-4 w-4 mr-2" />
                   Get Started
