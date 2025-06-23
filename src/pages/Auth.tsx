@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Eye, EyeOff, DollarSign, User } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Heart, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,16 +26,6 @@ const Auth = () => {
       setEmail(savedEmail);
     }
   }, [getSavedEmail]);
-
-  // Currency conversion rate (USD to KSH - you can make this dynamic later)
-  const usdToKshRate = 129.50; // Current approximate rate
-  
-  const convertToKsh = (usdAmount: number) => {
-    return `KSh ${(usdAmount * usdToKshRate).toLocaleString('en-KE', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    })}`;
-  };
 
   const cleanupAuthState = () => {
     // Clear all auth-related localStorage items except our saved login info
@@ -76,12 +67,10 @@ const Auth = () => {
     return null;
   };
 
-  const handleCaptchaBypass = async () => {
+  const handleMagicLink = async () => {
     try {
-      // Try to create a session with a simpler approach
-      toast.info("Attempting alternative login method...");
+      toast.info("Sending magic link...");
       
-      // Try direct session creation without CAPTCHA
       const { data, error } = await supabase.auth.signInWithOtp({
         email: email.trim().toLowerCase(),
         options: {
@@ -90,15 +79,15 @@ const Auth = () => {
       });
       
       if (error) {
-        console.error('OTP error:', error);
-        toast.error("Please check your Supabase dashboard and disable CAPTCHA protection completely.");
+        console.error('Magic link error:', error);
+        toast.error("Unable to send magic link. Please try signing in with your password instead.");
         return;
       }
       
       toast.success("Check your email for a magic link to sign in!");
     } catch (error) {
-      console.error('Bypass error:', error);
-      toast.error("Alternative method failed. Please disable CAPTCHA in Supabase dashboard.");
+      console.error('Magic link error:', error);
+      toast.error("Unable to send magic link. Please try signing in with your password instead.");
     }
   };
 
@@ -128,7 +117,7 @@ const Auth = () => {
         if (error) {
           console.error('Sign in error:', error);
           if (error.message.includes('captcha') || error.message.includes('verification process failed')) {
-            toast.error("CAPTCHA error detected. Try the 'Magic Link' option below or disable CAPTCHA in your Supabase dashboard.");
+            toast.error("Try the 'Magic Link' option below for easier sign in.");
             return;
           } else if (error.message.includes('Invalid login credentials') || error.message.includes('invalid_credentials')) {
             toast.error("Invalid email or password. Please check your credentials and try again.");
@@ -142,7 +131,7 @@ const Auth = () => {
         
         if (data.user && data.session) {
           console.log('Sign in successful:', data.user.email);
-          toast.success("Successfully signed in! Your login has been saved.");
+          toast.success("Welcome back!");
           // Force page reload to ensure clean state
           window.location.href = '/dashboard';
         }
@@ -171,14 +160,14 @@ const Auth = () => {
         if (error) {
           console.error('Sign up error:', error);
           if (error.message.includes('captcha') || error.message.includes('verification process failed')) {
-            toast.error("CAPTCHA error detected. Please disable CAPTCHA in your Supabase dashboard and try again.");
+            toast.error("There was an issue creating your account. Please try again.");
             return;
           } else if (error.message.includes('User already registered')) {
             toast.error("An account with this email already exists. Please sign in instead.");
             setIsLogin(true);
           } else if (error.message.includes('Error sending confirmation email')) {
             // Still create account but inform user about email issue
-            toast.success("Account created! You can now sign in. (Email confirmation temporarily unavailable)");
+            toast.success("Account created! You can now sign in.");
             setIsLogin(true);
             setPassword("");
             setConfirmPassword("");
@@ -193,7 +182,7 @@ const Auth = () => {
         if (data.user) {
           console.log('Sign up successful:', data.user.email);
           if (data.session) {
-            toast.success("Account created successfully! Your login has been saved. Welcome!");
+            toast.success("Welcome to Tunza! Your account has been created.");
             // Force page reload to ensure clean state
             window.location.href = '/dashboard';
           } else {
@@ -206,11 +195,7 @@ const Auth = () => {
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      if (error.message && error.message.includes('captcha')) {
-        toast.error("CAPTCHA blocking login. Please disable CAPTCHA in your Supabase dashboard or use the Magic Link option below.");
-      } else {
-        toast.error("An unexpected error occurred. Please try again.");
-      }
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -226,16 +211,6 @@ const Auth = () => {
         <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-teal-400/10 rounded-full blur-2xl animate-bounce-gentle"></div>
       </div>
       
-      {/* Currency Display Banner */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="bg-green-600/20 backdrop-blur-md border border-green-400/30 rounded-full px-6 py-2 flex items-center space-x-2">
-          <DollarSign className="h-4 w-4 text-green-300" />
-          <span className="text-green-100 text-sm font-medium">
-            $1 USD = {convertToKsh(1)}
-          </span>
-        </div>
-      </div>
-      
       <Card className="w-full max-w-md bg-white/5 backdrop-blur-xl border-green-400/20 relative z-10 shadow-2xl">
         <CardHeader className="text-center pb-6">
           <Button
@@ -246,13 +221,18 @@ const Auth = () => {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg">
+              <Heart className="h-7 w-7 text-white" />
+            </div>
+          </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-green-300 to-emerald-200 bg-clip-text text-transparent">
-            {isLogin ? "Welcome Back to Tunza" : "Join Tunza"}
+            {isLogin ? "Welcome Back!" : "Join Tunza"}
           </CardTitle>
           <p className="text-green-100/80 mt-2">
             {isLogin 
-              ? "Sign in to manage your finances in KSh" 
-              : "Create your account and start saving in Kenyan Shillings"
+              ? "Sign in to check your rewards and loyalty points" 
+              : "Create your account and start earning rewards"
             }
           </p>
           
@@ -261,17 +241,10 @@ const Auth = () => {
             <div className="mt-3 p-3 bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-lg border border-green-400/30">
               <div className="flex items-center space-x-2 text-green-200">
                 <User className="h-4 w-4" />
-                <span className="text-sm">Previously signed in as: {getSavedEmail()}</span>
+                <span className="text-sm">Welcome back: {getSavedEmail()}</span>
               </div>
             </div>
           )}
-          
-          {/* Sample pricing in KSh */}
-          <div className="mt-4 p-3 bg-gradient-to-r from-green-600/10 to-emerald-600/10 rounded-lg border border-green-400/20">
-            <p className="text-green-200 text-sm">
-              Premium Plan: <span className="font-bold text-green-100">{convertToKsh(9.99)}</span>/month
-            </p>
-          </div>
         </CardHeader>
         
         <CardContent className="space-y-6">
@@ -353,11 +326,11 @@ const Auth = () => {
                 <div className="flex-1 h-px bg-green-400/30"></div>
               </div>
               <Button
-                onClick={handleCaptchaBypass}
+                onClick={handleMagicLink}
                 variant="outline"
                 className="w-full border-green-400/40 text-green-200 hover:bg-green-400/10 hover:border-green-400/60 h-11 transition-all duration-200"
               >
-                Send Magic Link (No Password)
+                Send Magic Link (No Password Needed)
               </Button>
             </div>
           )}
@@ -378,33 +351,17 @@ const Auth = () => {
             </button>
           </div>
 
-          {/* Enhanced Troubleshooting help */}
-          <div className="mt-6 p-4 bg-gradient-to-r from-green-600/10 to-emerald-600/10 rounded-xl border border-green-400/20">
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-green-400 rounded-full mt-2 animate-pulse"></div>
-              <div>
-                <p className="text-green-200/90 text-sm font-medium mb-1">Having trouble signing in?</p>
-                <p className="text-green-300/70 text-xs leading-relaxed">
-                  Go to your Supabase dashboard → Authentication → Settings and disable "Enable CAPTCHA protection". 
-                  Also ensure your Site URL matches your current domain.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Login saved notification */}
-          {isLogin && (
-            <div className="mt-4 p-3 bg-green-800/20 rounded-lg border border-green-500/20">
-              <p className="text-green-200/90 text-xs text-center">
-                🔒 Your login will be saved securely for easy access next time
-              </p>
-            </div>
-          )}
-
-          {/* KSh Information */}
+          {/* Trust indicators */}
           <div className="mt-4 p-3 bg-green-800/20 rounded-lg border border-green-500/20">
             <p className="text-green-200/90 text-xs text-center">
-              💰 All prices displayed in Kenyan Shillings ({convertToKsh(1)} = $1 USD) • Exchange rate updated daily
+              🔒 Your login will be saved securely for easy access next time
+            </p>
+          </div>
+
+          {/* Benefits reminder */}
+          <div className="mt-4 p-3 bg-green-800/20 rounded-lg border border-green-500/20">
+            <p className="text-green-200/90 text-xs text-center">
+              ✨ Earn rewards • Track your points • Get exclusive offers
             </p>
           </div>
         </CardContent>
