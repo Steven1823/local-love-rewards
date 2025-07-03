@@ -66,6 +66,11 @@ const Index = () => {
       />
       <Footer />
 
+      {/* Add FloatingAIChat for everyone on the landing page */}
+      <FloatingAIChat 
+        businessContext="Welcome to Tunza Rewards - the free loyalty platform for everyone! Ask me about earning KES 30 through referrals!"
+      />
+
       <style>
         {`
           @keyframes shimmer {
