@@ -52,10 +52,11 @@ const ReferralManagement = ({ businessId, businessName }: ReferralManagementProp
           id,
           code,
           used_count,
-          customers:customer_id (
+          customers (
             name,
             phone_number,
-            points
+            points,
+            business_id
           )
         `)
         .eq('customers.business_id', businessId);
@@ -74,7 +75,7 @@ const ReferralManagement = ({ businessId, businessName }: ReferralManagementProp
 
       setReferralCodes(transformedCodes);
 
-      // Fetch referral history
+      // Fetch referral history with proper column hinting
       const { data: referralsData, error: referralsError } = await supabase
         .from('referrals')
         .select(`
@@ -82,10 +83,10 @@ const ReferralManagement = ({ businessId, businessName }: ReferralManagementProp
           points_awarded,
           created_at,
           referral_code,
-          referrer:referrer_customer_id (
+          referrer:customers!referrals_referrer_customer_id_fkey (
             name
           ),
-          referred:referred_customer_id (
+          referred:customers!referrals_referred_customer_id_fkey (
             name
           )
         `)

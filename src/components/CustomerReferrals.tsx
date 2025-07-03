@@ -34,11 +34,24 @@ const CustomerReferrals = ({ customerPhone }: CustomerReferralsProps) => {
     try {
       setLoading(true);
 
+      // First get the customer ID from phone number
+      const { data: customerData, error: customerError } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('phone_number', customerPhone)
+        .single();
+
+      if (customerError || !customerData) {
+        console.error('Customer not found:', customerError);
+        setReferralData(null);
+        return;
+      }
+
       // Get customer's referral code
       const { data: codeData, error: codeError } = await supabase
         .from('referral_codes')
         .select('code, used_count')
-        .eq('customers.phone_number', customerPhone)
+        .eq('customer_id', customerData.id)
         .single();
 
       if (codeError && codeError.code !== 'PGRST116') {
@@ -50,23 +63,23 @@ const CustomerReferrals = ({ customerPhone }: CustomerReferralsProps) => {
         return;
       }
 
-      // Get referrals made by this customer
+      // Get referrals made by this customer with proper column hinting
       const { data: referralsData, error: referralsError } = await supabase
         .from('referrals')
         .select(`
           points_awarded,
           created_at,
-          referred:referred_customer_id (
+          customers!referrals_referred_customer_id_fkey (
             name
           )
         `)
-        .eq('referral_code', codeData.code)
+        .eq('referrer_customer_id', customerData.id)
         .order('created_at', { ascending: false });
 
       if (referralsError) throw referralsError;
 
       const referrals = referralsData?.map(ref => ({
-        referred_name: ref.referred?.name || 'Unknown',
+        referred_name: ref.customers?.name || 'Unknown',
         points_awarded: ref.points_awarded || 0,
         created_at: ref.created_at
       })) || [];
