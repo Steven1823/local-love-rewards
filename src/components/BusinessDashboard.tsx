@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, MessageCircle, Star } from "lucide-react";
+import { Plus, MessageCircle, Star, Gift } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +13,7 @@ import CustomerMessaging from "./CustomerMessaging";
 import WarmMessageSender from "./WarmMessageSender";
 import AICustomerAssistant from "./AICustomerAssistant";
 import AutomatedAIMessaging from "./AutomatedAIMessaging";
+import ReferralManagement from "./ReferralManagement";
 
 interface BusinessDashboardProps {
   businessPhone?: string | null;
@@ -34,6 +35,7 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
   const { user } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [businessId, setBusinessId] = useState<string | null>(null);
+  const [businessName, setBusinessName] = useState<string>('Your Business');
   const [loading, setLoading] = useState(true);
 
   // Initialize business and fetch data
@@ -45,7 +47,7 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
         // Check if business exists
         let { data: business, error: fetchError } = await supabase
           .from('businesses')
-          .select('id')
+          .select('id, business_name')
           .eq('user_id', user.id)
           .single();
 
@@ -64,7 +66,7 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
               phone_number: businessPhone || user.phone || '0000000000',
               email: user.email
             })
-            .select('id')
+            .select('id, business_name')
             .single();
 
           if (createError) throw createError;
@@ -72,6 +74,7 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
         }
 
         setBusinessId(business.id);
+        setBusinessName(business.business_name || 'Your Business');
         await fetchCustomers(business.id);
       } catch (error) {
         console.error('Error initializing business:', error);
@@ -100,7 +103,7 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
     }
   };
 
-  const handleAddVisit = async (phoneNumber: string, amountUSD: number) => {
+  const handleAddVisit = async (phoneNumber: string, amountUSD: number, customerName?: string, referralCode?: string) => {
     if (!businessId) {
       toast.error('Business not initialized');
       return;
@@ -133,13 +136,40 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
           .insert({
             business_id: businessId,
             phone_number: phoneNumber,
-            name: 'Customer'
+            name: customerName || 'Customer'
           })
           .select('id')
           .single();
 
         if (createError) throw createError;
         customer = newCustomer;
+
+        // Process referral if code provided for new customer
+        if (referralCode && referralCode.trim()) {
+          try {
+            const { data: referralResult, error: referralError } = await supabase
+              .rpc('process_referral', {
+                referral_code_input: referralCode.trim().toUpperCase(),
+                new_customer_id: customer.id
+              });
+
+            if (referralError) {
+              console.error('Referral processing error:', referralError);
+            } else if (referralResult) {
+              toast.success('Referral applied! Both customers earned bonus points.');
+            } else {
+              toast.warning('Invalid or already used referral code.');
+            }
+          } catch (error) {
+            console.error('Referral processing error:', error);
+          }
+        }
+      } else if (customerName && customerName.trim()) {
+        // Update existing customer name if provided
+        await supabase
+          .from('customers')
+          .update({ name: customerName.trim() })
+          .eq('id', customer.id);
       }
 
       // Add visit record (this will automatically update customer stats via trigger)
@@ -204,10 +234,14 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="add-visit" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="add-visit" className="flex items-center">
               <Plus className="h-4 w-4 mr-2" />
               Add Visit
+            </TabsTrigger>
+            <TabsTrigger value="referrals" className="flex items-center">
+              <Gift className="h-4 w-4 mr-2" />
+              Referrals
             </TabsTrigger>
             <TabsTrigger value="ai-assistant" className="flex items-center">
               <Star className="h-4 w-4 mr-2" />
@@ -234,30 +268,39 @@ const BusinessDashboard = ({ businessPhone, onBack }: BusinessDashboardProps) =>
             </div>
           </TabsContent>
 
+          <TabsContent value="referrals">
+            {businessId && (
+              <ReferralManagement 
+                businessId={businessId} 
+                businessName={businessName}
+              />
+            )}
+          </TabsContent>
+
           <TabsContent value="ai-assistant">
             <AICustomerAssistant 
               customers={transformedCustomers}
-              businessName="Your Business"
+              businessName={businessName}
             />
           </TabsContent>
 
           <TabsContent value="auto-messaging">
             <AutomatedAIMessaging 
               customers={transformedCustomers}
-              businessName="Your Business"
+              businessName={businessName}
             />
           </TabsContent>
 
           <TabsContent value="messaging">
             <CustomerMessaging 
-              businessName="Your Business" 
+              businessName={businessName} 
               customers={transformedCustomers}
             />
           </TabsContent>
 
           <TabsContent value="warm-messages">
             <WarmMessageSender 
-              businessName="Your Business" 
+              businessName={businessName} 
               businessPhone={businessPhone || ""}
             />
           </TabsContent>

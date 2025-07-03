@@ -92,6 +92,21 @@ export type Database = {
           },
         ]
       }
+      login: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           business_id: string
@@ -133,6 +148,104 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          customer_id: string
+          id: string
+          used_count: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          customer_id: string
+          id?: string
+          used_count?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          customer_id?: string
+          id?: string
+          used_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string | null
+          id: string
+          points_awarded: number | null
+          referral_code: string
+          referred_customer_id: string
+          referrer_customer_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          points_awarded?: number | null
+          referral_code: string
+          referred_customer_id: string
+          referrer_customer_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          points_awarded?: number | null
+          referral_code?: string
+          referred_customer_id?: string
+          referrer_customer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_customer_id_fkey"
+            columns: ["referred_customer_id"]
+            isOneToOne: true
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_customer_id_fkey"
+            columns: ["referrer_customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      table_name: {
+        Row: {
+          data: Json | null
+          id: number
+          inserted_at: string
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          data?: Json | null
+          id?: number
+          inserted_at?: string
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          data?: Json | null
+          id?: number
+          inserted_at?: string
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       visits: {
         Row: {
@@ -181,7 +294,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_referral_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      process_referral: {
+        Args: { referral_code_input: string; new_customer_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

@@ -68,13 +68,20 @@ const Auth = () => {
   };
 
   const handleMagicLink = async () => {
+    if (!email.trim()) {
+      toast.error("Please enter your email address first");
+      return;
+    }
+
     try {
+      setLoading(true);
       toast.info("Sending magic link...");
       
       const { data, error } = await supabase.auth.signInWithOtp({
         email: email.trim().toLowerCase(),
         options: {
-          shouldCreateUser: false
+          shouldCreateUser: false,
+          emailRedirectTo: window.location.origin + '/dashboard'
         }
       });
       
@@ -88,11 +95,19 @@ const Auth = () => {
     } catch (error) {
       console.error('Magic link error:', error);
       toast.error("Unable to send magic link. Please try signing in with your password instead.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email.trim() || !password.trim()) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -117,12 +132,14 @@ const Auth = () => {
         if (error) {
           console.error('Sign in error:', error);
           if (error.message.includes('captcha') || error.message.includes('verification process failed')) {
-            toast.error("Try the 'Magic Link' option below for easier sign in.");
+            toast.error("Authentication verification failed. Try the 'Magic Link' option below for easier sign in.");
             return;
           } else if (error.message.includes('Invalid login credentials') || error.message.includes('invalid_credentials')) {
             toast.error("Invalid email or password. Please check your credentials and try again.");
           } else if (error.message.includes('Email not confirmed')) {
-            toast.error("Please check your email and confirm your account before signing in.");
+            toast.error("Please check your email and confirm your account before signing in. Or try the Magic Link option.");
+          } else if (error.message.includes('Too many requests')) {
+            toast.error("Too many login attempts. Please wait a moment and try again, or use the Magic Link option.");
           } else {
             toast.error(error.message);
           }
@@ -160,19 +177,21 @@ const Auth = () => {
         if (error) {
           console.error('Sign up error:', error);
           if (error.message.includes('captcha') || error.message.includes('verification process failed')) {
-            toast.error("There was an issue creating your account. Please try again.");
+            toast.error("There was an issue creating your account. Please try again or contact support.");
             return;
           } else if (error.message.includes('User already registered')) {
             toast.error("An account with this email already exists. Please sign in instead.");
             setIsLogin(true);
           } else if (error.message.includes('Error sending confirmation email')) {
             // Still create account but inform user about email issue
-            toast.success("Account created! You can now sign in.");
+            toast.success("Account created! You can now sign in directly or check your email for confirmation.");
             setIsLogin(true);
             setPassword("");
             setConfirmPassword("");
           } else if (error.message.includes('weak_password')) {
             toast.error("Password must contain uppercase, lowercase letters and numbers");
+          } else if (error.message.includes('Signup is disabled')) {
+            toast.error("New signups are currently disabled. Please contact support if you need access.");
           } else {
             toast.error(error.message);
           }
@@ -195,7 +214,7 @@ const Auth = () => {
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again or contact support if the issue persists.");
     } finally {
       setLoading(false);
     }
@@ -327,11 +346,17 @@ const Auth = () => {
               </div>
               <Button
                 onClick={handleMagicLink}
+                disabled={loading || !email.trim()}
                 variant="outline"
-                className="w-full border-green-400/40 text-green-200 hover:bg-green-400/10 hover:border-green-400/60 h-11 transition-all duration-200"
+                className="w-full border-green-400/40 text-green-200 hover:bg-green-400/10 hover:border-green-400/60 h-11 transition-all duration-200 disabled:opacity-50"
               >
-                Send Magic Link (No Password Needed)
+                {loading ? "Sending..." : "Send Magic Link (No Password Needed)"}
               </Button>
+              {!email.trim() && (
+                <p className="text-green-300/60 text-xs text-center">
+                  Enter your email above to use the magic link option
+                </p>
+              )}
             </div>
           )}
           
@@ -361,7 +386,7 @@ const Auth = () => {
           {/* Benefits reminder */}
           <div className="mt-4 p-3 bg-green-800/20 rounded-lg border border-green-500/20">
             <p className="text-green-200/90 text-xs text-center">
-              ✨ Earn rewards • Track your points • Get exclusive offers
+              ✨ Earn rewards • Track your points • Get exclusive offers • Refer friends for bonus points
             </p>
           </div>
         </CardContent>

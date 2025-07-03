@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Phone, Star, Gift, MessageCircle, Bot } from "lucide-react";
+import { Phone, Star, Gift, MessageCircle, Bot, Share2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import CustomerAIChat from "./CustomerAIChat";
+import CustomerReferrals from "./CustomerReferrals";
 import { formatKsh } from "@/utils/currency";
 
 interface CustomerDashboardProps {
@@ -91,7 +92,7 @@ const CustomerDashboard = ({ phoneNumber, onBack }: CustomerDashboardProps) => {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">My Rewards</h1>
-            <p className="text-white/80">Track your loyalty points and rewards</p>
+            <p className="text-white/80">Track your loyalty points and referrals</p>
           </div>
           <Button
             onClick={signOut}
@@ -148,10 +149,14 @@ const CustomerDashboard = ({ phoneNumber, onBack }: CustomerDashboardProps) => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="rewards" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="rewards" className="flex items-center">
               <Star className="h-4 w-4 mr-2" />
               My Rewards
+            </TabsTrigger>
+            <TabsTrigger value="referrals" className="flex items-center">
+              <Share2 className="h-4 w-4 mr-2" />
+              Referrals
             </TabsTrigger>
             <TabsTrigger value="ai-chat" className="flex items-center">
               <Bot className="h-4 w-4 mr-2" />
@@ -211,6 +216,10 @@ const CustomerDashboard = ({ phoneNumber, onBack }: CustomerDashboardProps) => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="referrals">
+            <CustomerReferrals customerPhone={phoneNumber || user?.phone || ''} />
           </TabsContent>
 
           <TabsContent value="ai-chat">
